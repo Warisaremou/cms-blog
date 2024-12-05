@@ -1,6 +1,6 @@
 export const authQueries = () => {
 	/**
-	 * Functionto find a user by his email
+	 * Function to find a user by his email
 	 */
 	const FIND_USER_BY_EMAIL = (email) => {
 		return `SELECT * FROM users where email=${email}`;
