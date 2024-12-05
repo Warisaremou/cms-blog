@@ -1,6 +1,3 @@
-import db from "../config/database.js";
-import { foodQueries } from "../database/queries/auth_queries.js";
-import { pagination } from "../helper.js";
 import { validationResult } from "express-validator";
 
 /**
@@ -35,4 +32,4 @@ const login = async (req, res) => {
 	});
 };
 
-export { register, login };
+export { login, register };
