@@ -5,7 +5,9 @@ import logger from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
 import "./config/database.js";
+import indexRouter from "./routes/index.js";
 import authRouter from "./routes/auth.js";
+import categoryRouter from "./routes/categories.js";
 
 const app = express();
 
@@ -19,8 +21,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 /**
- * Routes are defined here.
+ * ROUTES
  */
+app.use("/", indexRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/categories", categoryRouter);
 
 export default app;
