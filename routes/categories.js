@@ -1,5 +1,6 @@
 import express from "express";
-import { getAll, getOne, create, update, remove } from "../controllers/category_controller.js";
+import { create, getAll, getOne, remove, update } from "../controllers/category_controller.js";
+import createCategoryValidation from "../validators/category_validator.js";
 
 const router = express.Router();
 
@@ -12,9 +13,9 @@ router.get("/", getAll);
 // ----------- GET A CATEGORY BY ID ----------- //
 router.get("/:id", getOne);
 // ----------- ADD A CATEGORY ----------- //
-router.post("/", create);
+router.post("/", createCategoryValidation, create);
 // ----------- UPDATE A CATEGORY BY ID ----------- //
-router.patch("/:id", update);
+router.patch("/:id", createCategoryValidation, update);
 // ----------- DELETE A CATEGORY BY ID ----------- //
 router.delete("/:id", remove);
 

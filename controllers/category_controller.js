@@ -1,6 +1,7 @@
+import { validationResult } from "express-validator";
+import db from "../config/database.js";
 import { categoryQueries } from "../database/queries/category_queries.js";
 import { pagination } from "../helpers.js";
-import db from "../config/database.js";
 
 const { GET_ALL_CATEGORIES, GET_CATEGORY_BY_ID, ADD_CATEGORY, UPDATE_CATEGORY_BY_ID, DELETE_CATEGORY_BY_ID } =
 	categoryQueries();
@@ -57,7 +58,14 @@ const getOne = async (req, res) => {
  * FUNCTION TO CREATE A CATEGORY
  */
 const create = async (req, res) => {
-	console.log(req.body);
+	const result = await validationResult(req);
+
+	// Check validation
+	if (!result.isEmpty()) {
+		return res.status(400).json({
+			errors: result.errors,
+		});
+	}
 
 	await db.query(ADD_CATEGORY(req.body.name), (error, data) => {
 		if (error) {
@@ -77,7 +85,15 @@ const create = async (req, res) => {
  * FUNCTION TO UPDATE A CATEGORY BY ID
  */
 const update = async (req, res) => {
+	const result = await validationResult(req);
 	const id_category = await req.params.id;
+
+	// Check validation
+	if (!result.isEmpty()) {
+		return res.status(400).json({
+			errors: result.errors,
+		});
+	}
 
 	// TODO: CHECK IF CATEGORY WITH ID EXIST BEFORE UPDATING HIS VALUE
 	await db.query(UPDATE_CATEGORY_BY_ID(id_category, req.body.name), (error, data) => {

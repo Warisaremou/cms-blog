@@ -8,7 +8,7 @@ const findCategory = async (id_category) => {
 		return data[0];
 	});
 
-	console.log("5555555555555", result);
+	console.log("*************", result);
 };
 
 export { findCategory };
