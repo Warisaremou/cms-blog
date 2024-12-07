@@ -3,6 +3,7 @@ import { db } from "../config/database.js";
 import { authQueries } from "../database/queries/auth_queries.js";
 import { hashHelper } from "../helpers.js";
 import { findUser, userRole } from "../services/auth_service.js";
+import jwt from "jsonwebtoken";
 
 const { CREATE_USER } = authQueries();
 const { hash, compare } = hashHelper();
@@ -79,6 +80,7 @@ const login = async (req, res) => {
 
 	try {
 		let isValidPassword = false;
+		let userData = null;
 		// Check if a user with the same username or email exist
 		const existingUserWithUsername = await findUserWithUsername(identifier);
 		const existingUserWithEmail = await findUserWithEmail(identifier);
@@ -87,8 +89,10 @@ const login = async (req, res) => {
 			// Check if password is valid using compare from hashHelper
 			if (existingUserWithUsername.exist) {
 				isValidPassword = await compare(password, existingUserWithUsername.data.password);
+				userData = await existingUserWithUsername.data;
 			} else {
 				isValidPassword = await compare(password, existingUserWithEmail.data.password);
+				userData = await existingUserWithEmail.data;
 			}
 
 			if (!isValidPassword) {
@@ -98,10 +102,27 @@ const login = async (req, res) => {
 			}
 
 			// Generate token
+			const token = await jwt.sign(
+				{
+					id_user: userData.id_user,
+					username: userData.username,
+					surname: userData.surname,
+					firstname: userData.firstname,
+					email: userData.email,
+					address: userData.address,
+					avatar: userData.avatar,
+					date_of_birth: userData.date_of_birth,
+					description: userData.description,
+				},
+				process.env.AUTH_JWT_SECRET,
+				{
+					expiresIn: process.env.AUTH_JWT_TOKEN_EXPIRES_IN,
+				}
+			);
 
 			res.json({
 				message: "Connected",
-				token: "token",
+				token,
 			});
 		} else {
 			res.status(400).json({

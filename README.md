@@ -43,3 +43,9 @@ Run seeder
 ```bash
   npm run seeder
 ```
+
+Generate a JWT secret key
+
+```bash
+  openssl rand -hex 48
+```
