@@ -4,7 +4,7 @@ export async function initDatabase() {
 	try {
 		// -------- Initialize roles table -------- //
 		await db.query(
-			`CREATE TABLE roles (id_role INT AUTO_INCREMENT NOT NULL, name VARCHAR(100) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP , deleted_at DATETIME DEFAULT NULL, PRIMARY KEY (id_role))`
+			`CREATE TABLE roles (id_role INT AUTO_INCREMENT NOT NULL UNIQUE, name VARCHAR(100) NOT NULL UNIQUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP , deleted_at DATETIME DEFAULT NULL, PRIMARY KEY (id_role))`
 		);
 
 		// -------- Initialize users table -------- //
