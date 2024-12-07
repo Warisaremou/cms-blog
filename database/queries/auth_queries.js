@@ -1,20 +1,24 @@
 export const authQueries = () => {
-	/**
-	 * Function to find a user by his email
-	 */
-	const FIND_USER_BY_EMAIL = (email) => {
-		return `SELECT * FROM users where email=${email}`;
+	const FIND_USER_WITH_USERNAME = (username) => {
+		return `SELECT id_user FROM users WHERE username='${username}'`;
 	};
 
-	/**
-	 * Function to insert a new user in the users table
-	 */
-	const INSERT_USER = (username, email, surname, firstname, password, role) => {
-		return `INSERT INTO users (username, email, surname, firstname, password, role) VALUES (${username}, ${email}, ${surname}, ${firstname}, ${password}, ${role})`;
+	const FIND_USER_WITH_EMAIL = (email) => {
+		return `SELECT id_user FROM users WHERE email='${email}'`;
+	};
+
+	const GET_ROLE = (role_name) => {
+		return `SELECT id_role FROM roles WHERE name='${role_name}'`;
+	};
+
+	const CREATE_USER = (username, surname, firstname, email, password, id_role) => {
+		return `INSERT INTO users(username, surname, firstname, email, password, id_role) VALUES ('${username}','${surname}','${firstname}','${email}','${password}',${id_role})`;
 	};
 
 	return {
-		FIND_USER_BY_EMAIL,
-		INSERT_USER,
+		FIND_USER_WITH_USERNAME,
+		FIND_USER_WITH_EMAIL,
+		GET_ROLE,
+		CREATE_USER,
 	};
 };
