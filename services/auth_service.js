@@ -35,6 +35,7 @@ const findUser = () => {
 		} else {
 			return {
 				exist: true,
+				data: data[0],
 			};
 		}
 	};
@@ -49,6 +50,7 @@ const findUser = () => {
 		} else {
 			return {
 				exist: true,
+				data: data[0],
 			};
 		}
 	};

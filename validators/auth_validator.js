@@ -55,4 +55,27 @@ const registerValidator = [
 		.trim(),
 ];
 
-export { registerValidator };
+const loginValidator = [
+	body("identifier")
+		.notEmpty({
+			ignore_whitespace: true,
+		})
+		.withMessage("identifier is required")
+		.isLength({
+			min: 3,
+		})
+		.withMessage("identifier must be at least 3 characters")
+		.trim(),
+	body("password")
+		.notEmpty({
+			ignore_whitespace: true,
+		})
+		.withMessage("password is required")
+		.isLength({
+			min: 8,
+		})
+		.withMessage("password must have at least 8 characters")
+		.trim(),
+];
+
+export { registerValidator, loginValidator };

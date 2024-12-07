@@ -1,10 +1,10 @@
 export const authQueries = () => {
 	const FIND_USER_WITH_USERNAME = (username) => {
-		return `SELECT id_user FROM users WHERE username='${username}'`;
+		return `SELECT * FROM users WHERE username='${username}'`;
 	};
 
 	const FIND_USER_WITH_EMAIL = (email) => {
-		return `SELECT id_user FROM users WHERE email='${email}'`;
+		return `SELECT * FROM users WHERE email='${email}'`;
 	};
 
 	const GET_ROLE = (role_name) => {
