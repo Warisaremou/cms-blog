@@ -4,7 +4,7 @@ import { db } from "../config/database.js";
 /**
  * This function check if a category exist and return a boolean
  * @param {*} id_category
- * @returns boolean
+ * @returns boolean and data(if category exist)
  */
 const categoryExist = async (id_category) => {
 	const { GET_CATEGORY_BY_ID } = await categoryQueries();
