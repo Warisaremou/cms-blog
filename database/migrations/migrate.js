@@ -11,11 +11,11 @@ export async function initDatabase() {
 		// await db.query(`
 		//   DROP TABLE IF EXISTS users ;
 		//   CREATE TABLE users (
-		//     id_user INT AUTO_INCREMENT NOT NULL,
-		//     username VARCHAR(100) NOT NULL,
+		//     id_user INT AUTO_INCREMENT NOT NULL UNIQUE,
+		//     username VARCHAR(100) NOT NULL UNIQUE,
 		//     surname VARCHAR(100) NOT NULL,
 		//     firstname VARCHAR(100) NOT NULL,
-		//     email VARCHAR(100) NOT NULL,
+		//     email VARCHAR(100) NOT NULL UNIQUE,
 		//     password VARCHAR(100) NOT NULL,
 		//     address VARCHAR(100),
 		//     avatar TEXT,
@@ -34,7 +34,7 @@ export async function initDatabase() {
 		// await db.query(`
 		//   DROP TABLE IF EXISTS categories ;
 		//   CREATE TABLE categories (
-		//     id_category INT AUTO_INCREMENT NOT NULL,
+		//     id_category INT AUTO_INCREMENT NOT NULL UNIQUE,
 		//     name VARCHAR(100) NOT NULL,
 		//     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		//     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
@@ -47,7 +47,7 @@ export async function initDatabase() {
 		// await db.query(`
 		//   DROP TABLE IF EXISTS posts ;
 		//   CREATE TABLE posts (
-		//     id_post INT AUTO_INCREMENT NOT NULL,
+		//     id_post INT AUTO_INCREMENT NOT NULL UNIQUE,
 		//     title VARCHAR(100) NOT NULL,
 		//     image TEXT NOT NULL,
 		//     content TEXT NOT NULL,
@@ -76,7 +76,7 @@ export async function initDatabase() {
 		// await db.query(`
 		//   DROP TABLE IF EXISTS comments ;
 		//   CREATE TABLE comments (
-		//     id_comment INT AUTO_INCREMENT NOT NULL,
+		//     id_comment INT AUTO_INCREMENT NOT NULL UNIQUE,
 		//     content TEXT NOT NULL,
 		//     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		//     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
