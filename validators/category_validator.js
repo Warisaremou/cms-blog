@@ -13,4 +13,4 @@ const createCategoryValidation = [
 		.trim(),
 ];
 
-export default createCategoryValidation;
+export { createCategoryValidation };
