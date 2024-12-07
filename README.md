@@ -31,3 +31,15 @@ Start the server
 ```bash
   npm run start
 ```
+
+Run migration
+
+```bash
+  npm run migration
+```
+
+Run seeder
+
+```bash
+  npm run seeder
+```
