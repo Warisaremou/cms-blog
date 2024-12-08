@@ -78,4 +78,19 @@ const loginValidator = [
 		.trim(),
 ];
 
-export { registerValidator, loginValidator };
+const forgotPasswordValidator = [
+	body("email")
+		.notEmpty({
+			ignore_whitespace: true,
+		})
+		.withMessage("email is required")
+		.isLength({
+			min: 3,
+		})
+		.withMessage("email must be at least 3 characters")
+		.isEmail()
+		.withMessage("email is invalid")
+		.trim(),
+];
+
+export { registerValidator, loginValidator, forgotPasswordValidator };

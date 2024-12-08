@@ -1,9 +1,10 @@
 import { validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
 import { db } from "../config/database.js";
 import { authQueries } from "../database/queries/auth_queries.js";
 import { hashHelper } from "../helpers.js";
 import { findUser, userRole } from "../services/auth_service.js";
-import jwt from "jsonwebtoken";
+import { transport } from "../config/email.js";
 
 const { CREATE_USER } = authQueries();
 const { hash, compare } = hashHelper();
@@ -136,4 +137,54 @@ const login = async (req, res) => {
 	}
 };
 
-export { login, register };
+/**
+ * FUNCTION TO SEND A FORGOT PASSWORD EMAIL
+ */
+const forgotPassword = async (req, res) => {
+	const result = validationResult(req);
+	const email = req.body.email;
+
+	// Check validation
+	if (!result.isEmpty()) {
+		return res.status(400).json({
+			message: result.errors,
+		});
+	}
+
+	try {
+		// Check if a user with the same email exist
+		const existingUserWithEmail = await findUserWithEmail(email);
+
+		if (!existingUserWithEmail.exist) {
+			return res.status(400).json({
+				message: "Account not found",
+			});
+		}
+
+		// Send an email to the user
+		await transport
+			.sendMail({
+				from: `${process.env.MAIL_DEFAULT_SENDER_NAME} ${process.env.MAIL_DEFAULT_SENDER}`,
+				to: email,
+				subject: "Reset your password",
+				html: "<b>Hello world?</b>",
+			})
+			.then((response) => {
+				// console.log("*****", response);
+				res.status(201).json({
+					message: "An email has been send to you",
+				});
+			})
+			.catch((error) => {
+				res.status(500).json({
+					message: error.messag,
+				});
+			});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+
+export { forgotPassword, login, register };

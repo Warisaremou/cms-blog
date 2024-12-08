@@ -1,13 +1,14 @@
 import cookieParser from "cookie-parser";
-// import "dotenv/config";
+import cors from "cors";
 import express from "express";
 import logger from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
+import { corsOptions } from "./config/cors.js";
 import { connect } from "./config/database.js";
-import indexRouter from "./routes/index.js";
 import authRouter from "./routes/auth.js";
 import categoryRouter from "./routes/categories.js";
+import indexRouter from "./routes/index.js";
 
 const app = express();
 connect();
@@ -16,6 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, "public")));
+app.use(cors(corsOptions));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
