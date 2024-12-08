@@ -32,3 +32,17 @@ export const hashHelper = () => {
 		compare,
 	};
 };
+
+/**
+ * Helper function to generate random string
+ */
+export const randomStringGenerator = () => {
+	let result = "";
+	const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+	for (let i = 0; i < 64; i++) {
+		const randomInd = Math.floor(Math.random() * characters.length);
+		result += characters.charAt(randomInd);
+	}
+	return result;
+};

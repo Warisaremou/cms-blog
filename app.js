@@ -2,16 +2,22 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import logger from "morgan";
+import hbs from "nodemailer-express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
 import { corsOptions } from "./config/cors.js";
 import { connect } from "./config/database.js";
+import { transport } from "./config/email.js";
+import { hbsOptions } from "./config/hbs-options.js";
 import authRouter from "./routes/auth.js";
 import categoryRouter from "./routes/categories.js";
 import indexRouter from "./routes/index.js";
 
 const app = express();
 connect();
+
+//EMAIL TEMPLATE CONFIG USING HANDLEBARS
+transport.use("compile", hbs(hbsOptions));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

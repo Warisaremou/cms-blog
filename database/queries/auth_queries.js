@@ -15,10 +15,15 @@ export const authQueries = () => {
 		return `INSERT INTO users(username, surname, firstname, email, password, id_role) VALUES ('${username}','${surname}','${firstname}','${email}','${password}',${id_role})`;
 	};
 
+	const UPDATE_USER_HASH = (hash, email) => {
+		return `UPDATE users SET hash='${hash}' WHERE email='${email}'`;
+	};
+
 	return {
 		FIND_USER_WITH_USERNAME,
 		FIND_USER_WITH_EMAIL,
 		GET_ROLE,
 		CREATE_USER,
+		UPDATE_USER_HASH,
 	};
 };

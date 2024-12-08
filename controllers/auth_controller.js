@@ -2,11 +2,11 @@ import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import { db } from "../config/database.js";
 import { authQueries } from "../database/queries/auth_queries.js";
-import { hashHelper } from "../helpers.js";
+import { hashHelper, randomStringGenerator } from "../helpers.js";
 import { findUser, userRole } from "../services/auth_service.js";
 import { transport } from "../config/email.js";
 
-const { CREATE_USER } = authQueries();
+const { CREATE_USER, UPDATE_USER_HASH } = authQueries();
 const { hash, compare } = hashHelper();
 const { findUserWithUsername, findUserWithEmail } = findUser();
 
@@ -161,15 +161,22 @@ const forgotPassword = async (req, res) => {
 			});
 		}
 
+		// Generate hash in url query param
+		const generatedHash = await randomStringGenerator();
+		await db.execute(UPDATE_USER_HASH(generatedHash, email));
+
 		// Send an email to the user
 		await transport
 			.sendMail({
 				from: `${process.env.MAIL_DEFAULT_SENDER_NAME} ${process.env.MAIL_DEFAULT_SENDER}`,
 				to: email,
 				subject: "Reset your password",
-				html: "<b>Hello world?</b>",
+				template: "forgot-password",
+				context: {
+					url: `${process.env.FRONTEND_DOMAIN}/reset-password?hash=${generatedHash}`,
+				},
 			})
-			.then((response) => {
+			.then(() => {
 				// console.log("*****", response);
 				res.status(201).json({
 					message: "An email has been send to you",
