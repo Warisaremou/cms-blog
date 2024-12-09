@@ -8,6 +8,17 @@ async function seedDatabase() {
 		await db.execute(`INSERT INTO roles(name) VALUES ('user')`);
 		// -------- Create moderator role -------- //
 		await db.execute(`INSERT INTO roles(name) VALUES ('moderator')`);
+		// -------- Create Categories -------- //
+		await db.execute(`INSERT INTO categories (name) VALUES 
+			('Actualités et Tendances'),
+			('Culture et divertissement'),
+			('Technologie et innovation'),
+			('Voyage et découvertes'),
+			('Science et environnement'),
+			('Gastronomie et cuisine'),
+			('Futur et prospective')
+		`);
+		
 
 		console.log("✅ Database seeded successfully ✅");
 		process.exit(0);
