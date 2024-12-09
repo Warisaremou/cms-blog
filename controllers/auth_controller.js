@@ -1,10 +1,10 @@
 import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import { db } from "../config/database.js";
+import { transport } from "../config/email.js";
 import { authQueries } from "../database/queries/auth_queries.js";
 import { hashHelper, randomStringGenerator } from "../helpers.js";
 import { findUser, userRole } from "../services/auth_service.js";
-import { transport } from "../config/email.js";
 
 const { CREATE_USER, UPDATE_USER_HASH, UPDATE_USER_PASSWORD_WITH_HASH } = authQueries();
 const { hash, compare } = hashHelper();
@@ -233,4 +233,22 @@ const resetPassword = async (req, res) => {
 		});
 	}
 };
-export { login, register, forgotPassword, resetPassword };
+
+/**
+ * FUNCTION TO RESET PASSWORD
+ */
+const getMe = async (req, res) => {
+	const token = await req.headers.authorization.slice(7);
+	await jwt.verify(token, process.env.AUTH_JWT_SECRET, (error, decoded) => {
+		// console.log(error);
+		if (error) {
+			return res.status(401).json({
+				message: "Invalid token",
+			});
+		}
+
+		res.json(decoded);
+	});
+};
+
+export { forgotPassword, getMe, login, register, resetPassword };
