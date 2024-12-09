@@ -1,7 +1,7 @@
 import { db } from "../config/database.js";
 import { authQueries } from "../database/queries/auth_queries.js";
 
-const { GET_ROLE, FIND_USER_WITH_EMAIL, FIND_USER_WITH_USERNAME } = await authQueries();
+const { GET_ROLE, FIND_USER_WITH_EMAIL, FIND_USER_WITH_USERNAME, FIND_USER_WITH_HASH } = await authQueries();
 
 /**
  * This function send a request to the roles table with the provided role name
@@ -55,9 +55,20 @@ const findUser = () => {
 		}
 	};
 
+	const findUserWithHash = async (hash) => {
+		const [data] = await db.execute(FIND_USER_WITH_HASH(hash));
+
+		if (data.length === 0) {
+			return false;
+		} else {
+			return true;
+		}
+	};
+
 	return {
 		findUserWithUsername,
 		findUserWithEmail,
+		findUserWithHash,
 	};
 };
 

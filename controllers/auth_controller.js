@@ -6,9 +6,9 @@ import { hashHelper, randomStringGenerator } from "../helpers.js";
 import { findUser, userRole } from "../services/auth_service.js";
 import { transport } from "../config/email.js";
 
-const { CREATE_USER, UPDATE_USER_HASH } = authQueries();
+const { CREATE_USER, UPDATE_USER_HASH, UPDATE_USER_PASSWORD_WITH_HASH } = authQueries();
 const { hash, compare } = hashHelper();
-const { findUserWithUsername, findUserWithEmail } = findUser();
+const { findUserWithUsername, findUserWithEmail, findUserWithHash } = findUser();
 
 /**
  * FUNCTION TO REGISTER A NEW USER
@@ -163,6 +163,7 @@ const forgotPassword = async (req, res) => {
 
 		// Generate hash in url query param
 		const generatedHash = await randomStringGenerator();
+		// Insert generatedHash in the user's data
 		await db.execute(UPDATE_USER_HASH(generatedHash, email));
 
 		// Send an email to the user
@@ -194,4 +195,42 @@ const forgotPassword = async (req, res) => {
 	}
 };
 
-export { forgotPassword, login, register };
+/**
+ * FUNCTION TO RESET PASSWORD
+ */
+const resetPassword = async (req, res) => {
+	const result = validationResult(req);
+	const { hashValue, password } = req.body;
+
+	// Check validation
+	if (!result.isEmpty()) {
+		return res.status(400).json({
+			message: result.errors,
+		});
+	}
+
+	try {
+		// Check hash validity
+		const isValidHash = await findUserWithHash(hashValue);
+
+		if (!isValidHash) {
+			return res.status(400).json({
+				message: "Invalid hash or expired link",
+			});
+		}
+
+		// Hash submitted password
+		const hashedPassword = await hash(password);
+
+		await db.execute(UPDATE_USER_PASSWORD_WITH_HASH(hashValue, hashedPassword));
+
+		res.status(201).json({
+			message: "Password reseted successfully",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+export { login, register, forgotPassword, resetPassword };

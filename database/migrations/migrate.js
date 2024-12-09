@@ -18,7 +18,7 @@ export async function initDatabase() {
 
 		// -------- Initialize users table -------- //
 		await db.query(
-			`CREATE TABLE users (id_user INT AUTO_INCREMENT NOT NULL UNIQUE, username VARCHAR(100) NOT NULL UNIQUE, surname VARCHAR(100) NOT NULL, firstname VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL UNIQUE, password VARCHAR(250) NOT NULL, address VARCHAR(100), avatar TEXT, date_of_birth DATE, description TEXT, hash VARCHAR(250), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, deleted_at DATETIME DEFAULT NULL, PRIMARY KEY (id_user), id_role INT NOT NULL DEFAULT 2, FOREIGN KEY (id_role) REFERENCES roles(id_role) ON DELETE CASCADE)`
+			`CREATE TABLE users (id_user INT AUTO_INCREMENT NOT NULL UNIQUE, username VARCHAR(100) NOT NULL UNIQUE, surname VARCHAR(100) NOT NULL, firstname VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL UNIQUE, password VARCHAR(250) NOT NULL, address VARCHAR(100), avatar TEXT, date_of_birth DATE, description TEXT, hash VARCHAR(250) UNIQUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, deleted_at DATETIME DEFAULT NULL, PRIMARY KEY (id_user), id_role INT NOT NULL DEFAULT 2, FOREIGN KEY (id_role) REFERENCES roles(id_role) ON DELETE CASCADE)`
 		);
 
 		// -------- Initialize categories table -------- //

@@ -93,4 +93,27 @@ const forgotPasswordValidator = [
 		.trim(),
 ];
 
-export { registerValidator, loginValidator, forgotPasswordValidator };
+const resetPasswordValidator = [
+	body("hashValue")
+		.notEmpty({
+			ignore_whitespace: true,
+		})
+		.withMessage("hash value is required")
+		.isLength({
+			min: 30,
+		})
+		.withMessage("hash value must be at least 30 characters")
+		.trim(),
+	body("password")
+		.notEmpty({
+			ignore_whitespace: true,
+		})
+		.withMessage("new password is required")
+		.isLength({
+			min: 8,
+		})
+		.withMessage("password must have at least 8 characters")
+		.trim(),
+];
+
+export { registerValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator };

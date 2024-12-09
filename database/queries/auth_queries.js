@@ -7,6 +7,10 @@ export const authQueries = () => {
 		return `SELECT * FROM users WHERE email='${email}'`;
 	};
 
+	const FIND_USER_WITH_HASH = (hash) => {
+		return `SELECT id_user FROM users WHERE hash='${hash}'`;
+	};
+
 	const GET_ROLE = (role_name) => {
 		return `SELECT id_role FROM roles WHERE name='${role_name}'`;
 	};
@@ -19,11 +23,17 @@ export const authQueries = () => {
 		return `UPDATE users SET hash='${hash}' WHERE email='${email}'`;
 	};
 
+	const UPDATE_USER_PASSWORD_WITH_HASH = (hash, password) => {
+		return `UPDATE users SET password='${password}', hash=NULL WHERE hash='${hash}'`;
+	};
+
 	return {
 		FIND_USER_WITH_USERNAME,
 		FIND_USER_WITH_EMAIL,
+		FIND_USER_WITH_HASH,
 		GET_ROLE,
 		CREATE_USER,
 		UPDATE_USER_HASH,
+		UPDATE_USER_PASSWORD_WITH_HASH,
 	};
 };
