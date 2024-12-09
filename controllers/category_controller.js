@@ -24,9 +24,8 @@ const getAll = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		// console.log(error);
 		return res.status(500).json({
-			error: error.message,
+			message: error.message,
 		});
 	}
 };
@@ -65,27 +64,19 @@ const create = async (req, res) => {
 	// Check validation
 	if (!result.isEmpty()) {
 		return res.status(400).json({
-			errors: result.errors,
+			message: result.errors,
 		});
 	}
 
 	try {
-		const [data] = await db.execute(ADD_CATEGORY(req.body.name));
-		const isCategoryExist = await categoryExist(data.insertId);
+		await db.execute(ADD_CATEGORY(req.body.name));
 
-		if (isCategoryExist.exist) {
-			res.status(201).json({
-				message: "Category created",
-				data: isCategoryExist.data,
-			});
-		} else {
-			res.status(201).json({
-				message: "Category created",
-			});
-		}
+		res.status(201).json({
+			message: "Category created",
+		});
 	} catch (error) {
 		return res.status(500).json({
-			error: error.message,
+			message: error.message,
 		});
 	}
 };
@@ -101,7 +92,7 @@ const update = async (req, res) => {
 	// Check validation
 	if (!result.isEmpty()) {
 		return res.status(400).json({
-			errors: result.errors,
+			message: result.errors,
 		});
 	}
 
@@ -116,7 +107,7 @@ const update = async (req, res) => {
 			});
 		} catch (error) {
 			return res.status(500).json({
-				error: error.message,
+				message: error.message,
 			});
 		}
 	} else {
@@ -142,7 +133,7 @@ const remove = async (req, res) => {
 			});
 		} catch (error) {
 			return res.status(500).json({
-				error: error.message,
+				message: error.message,
 			});
 		}
 	} else {
