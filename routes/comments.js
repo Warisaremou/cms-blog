@@ -1,5 +1,5 @@
 import express from "express";
-import { getAll, getOne, create,update } from "../controllers/comment_controller.js";
+import { getAll, getOne, create,update,remove } from "../controllers/comment_controller.js";
 import { createCommentValidation, updateCommentValidation } from "../validators/comment_validator.js";
 
 
@@ -15,9 +15,10 @@ router.get("/", getAll);
 router.get("/:id", getOne);
 // ----------- ADD A COMMENT ----------- //
 router.post("/", createCommentValidation,create);
-// ----------- UPDATE A CATEGORY BY ID ----------- //
+// ----------- UPDATE A COMMENT BY ID ----------- //
 router.patch("/:id", updateCommentValidation, update);
-
+// ----------- DELETE A COMMENT BY ID ----------- //
+router.delete("/:id", remove);
 
 
 export default router;

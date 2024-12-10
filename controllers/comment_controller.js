@@ -4,7 +4,7 @@ import { commentQueries } from "../database/queries/comment_queries.js";
 import { pagination } from "../helpers.js";
 import { commentExist } from "../services/comment_service.js";
 
-const {GET_ALL_COMMENTS,GET_COMMENT_BY_ID,ADD_COMMENT,UPDATE_COMMENT_BY_ID}=commentQueries()
+const {GET_ALL_COMMENTS,GET_COMMENT_BY_ID,ADD_COMMENT,UPDATE_COMMENT_BY_ID,DELETE_COMMENT_BY_ID}=commentQueries()
 
 /**
  * FUNCTION TO GET ALL COMMENTS
@@ -116,4 +116,30 @@ const update = async (req, res) => {
 	}
 };
 
-export {getAll,getOne,create,update}
+/**
+ * FUNCTION TO DELETE A COMMENT BY ID
+ */
+const remove = async (req, res) => {
+	const id_comment = await req.params.id;
+	const isCommentExist = await commentExist(id_comment);
+
+	if (isCommentExist.exist) {
+		try {
+			await db.execute(DELETE_COMMENT_BY_ID(id_comment));
+
+			res.json({
+				message: "Comment deleted",
+			});
+		} catch (error) {
+			return res.status(500).json({
+				message: error.message,
+			});
+		}
+	} else {
+		res.status(404).json({
+			message: "Comment not found",
+		});
+	}
+};
+
+export {getAll,getOne,create,update,remove}
