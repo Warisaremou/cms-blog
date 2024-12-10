@@ -118,11 +118,12 @@ const update = async (req, res) => {
 	// Check if the post already exist
 	if (isPostExist.exist) {
 		try {
-			await db.execute(UPDATE_POST_BY_ID(title, image, content));
+			await db.execute(UPDATE_POST_BY_ID(id_post,title, image, content));
+	 
 
 			res.json({
 				message: "Post updated",
-				data: isPostExist.data,
+				//data: isPostExist.data,
 			});
 		} catch (error) {
 			return res.status(500).json({
