@@ -3,10 +3,11 @@ import jwt from "jsonwebtoken";
 import { db } from "../config/database.js";
 import { transport } from "../config/email.js";
 import { authQueries } from "../database/queries/auth_queries.js";
-import { hashHelper, randomStringGenerator } from "../helpers.js";
-import { findUser, userRole } from "../services/auth_service.js";
+import { hashHelper, pagination, randomStringGenerator } from "../helpers.js";
+import { decodeToken, findUser, userRole } from "../services/auth_service.js";
 
-const { CREATE_USER, UPDATE_USER_HASH, UPDATE_USER_PASSWORD_WITH_HASH } = authQueries();
+const { CREATE_USER, UPDATE_USER_HASH, UPDATE_USER_PASSWORD_WITH_HASH, FIND_ALL_USERS, DELETE_USER_ACCOUNT_BY_EMAIL } =
+	authQueries();
 const { hash, compare } = hashHelper();
 const { findUserWithUsername, findUserWithEmail, findUserWithHash } = findUser();
 
@@ -44,7 +45,7 @@ const register = async (req, res) => {
 		// Hash submitted password
 		const hashedPassword = await hash(password);
 
-		// Get id of the role with by name user from the db
+		// Get id of the role with the name user from the db
 		const isRoleExist = await userRole("user");
 
 		if (!isRoleExist.exist) {
@@ -239,16 +240,85 @@ const resetPassword = async (req, res) => {
  */
 const getMe = async (req, res) => {
 	const token = await req.headers.authorization.slice(7);
-	await jwt.verify(token, process.env.AUTH_JWT_SECRET, (error, decoded) => {
-		// console.log(error);
-		if (error) {
-			return res.status(401).json({
-				message: "Invalid token",
+
+	const isValidToken = await decodeToken(token);
+
+	if (isValidToken.isError) {
+		return res.status(401).json({
+			message: "Invalid token",
+		});
+	}
+
+	res.json(isValidToken.data);
+};
+
+/**
+ * FUNCTION TO GET ALL USERS(ONLY ADMIN HAVE ACCESS)
+ */
+const getUsers = async (req, res) => {
+	try {
+		const { page, currentPage, per_page } = await pagination(req.query.page);
+
+		const [data] = await db.execute(FIND_ALL_USERS(per_page, page));
+
+		// Get id of the role with the name admin from the db
+		const isRoleExist = await userRole("admin");
+
+		if (!isRoleExist.exist) {
+			return res.status(404).json({
+				message: "User's role not found",
 			});
 		}
 
-		res.json(decoded);
+		// Filter data to remove admin users from the list
+		const usersList = data.filter((user) => user.id_role !== isRoleExist.id_role);
+
+		res.json({
+			data: usersList,
+			meta: {
+				page: currentPage,
+				per_page,
+			},
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+
+/**
+ * FUNCTION TO UPDATE USER PROFILE
+ */
+const update = async (req, res) => {};
+
+/**
+ * FUNCTION TO DELETE ACCOUNT
+ */
+const remove = async (req, res) => {
+	const token = await req.headers.authorization.slice(7);
+	const isValidToken = await decodeToken(token);
+	const user_email = isValidToken.data.email;
+
+	if (isValidToken.isError) {
+		return res.status(401).json({
+			message: "Invalid token",
+		});
+	}
+
+	const existingUserWithEmail = await findUserWithEmail(user_email);
+
+	if (!existingUserWithEmail.exist) {
+		return res.status(400).json({
+			message: "Account not found",
+		});
+	}
+
+	await db.execute(DELETE_USER_ACCOUNT_BY_EMAIL(user_email));
+
+	res.json({
+		message: "Account deleted successfuly",
 	});
 };
 
-export { forgotPassword, getMe, login, register, resetPassword };
+export { forgotPassword, getMe, getUsers, login, register, resetPassword, update, remove };

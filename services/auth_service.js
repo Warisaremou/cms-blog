@@ -1,10 +1,11 @@
+import jwt from "jsonwebtoken";
 import { db } from "../config/database.js";
 import { authQueries } from "../database/queries/auth_queries.js";
 
 const { GET_ROLE, FIND_USER_WITH_EMAIL, FIND_USER_WITH_USERNAME, FIND_USER_WITH_HASH } = await authQueries();
 
 /**
- * This function send a request to the roles table with the provided role name
+ * This function send a request to the roles table with the provided role name and return the role id
  */
 const userRole = async (role_name) => {
 	const [data] = await db.execute(GET_ROLE(role_name));
@@ -72,4 +73,22 @@ const findUser = () => {
 	};
 };
 
-export { userRole, findUser };
+/**
+ * This function take a token in params an decode it
+ */
+const decodeToken = async (token) => {
+	try {
+		const decoded = await jwt.verify(token, process.env.AUTH_JWT_SECRET);
+
+		return {
+			isError: false,
+			data: decoded,
+		};
+	} catch (error) {
+		return {
+			isError: true,
+		};
+	}
+};
+
+export { decodeToken, findUser, userRole };
