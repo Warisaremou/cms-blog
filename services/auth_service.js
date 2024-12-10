@@ -96,7 +96,6 @@ const findUser = () => {
 const decodeToken = async (token) => {
 	try {
 		const decoded = await jwt.verify(token, process.env.AUTH_JWT_SECRET);
-
 		return {
 			isError: false,
 			data: decoded,

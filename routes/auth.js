@@ -10,6 +10,7 @@ import {
 	update,
 	updateRole,
 } from "../controllers/auth_controller.js";
+import { authMiddleware, isAdminMiddleware } from "../middleware/auth_middleware.js";
 import {
 	forgotPasswordValidator,
 	loginValidator,
@@ -33,14 +34,14 @@ router.post("/forgot-password", forgotPasswordValidator, forgotPassword);
 // ----------- RESET PASSWORD ----------- //
 router.post("/reset-password", resetPasswordValidator, resetPassword);
 // ----------- GET PROFILE INFO ----------- //
-router.get("/me", getMe);
+router.get("/me", authMiddleware, getMe);
 // ----------- GET ALL USERS ----------- //
-router.get("/users", getUsers);
+router.get("/users", authMiddleware, isAdminMiddleware, getUsers);
 // ----------- UPDATE PROFILE ----------- //
-router.patch("/", update);
+router.patch("/", authMiddleware, update);
 // ----------- UPDATE A USER ROLE BY ID ----------- //
-router.patch("/user-role/:id", updateRoleValidator, updateRole);
+router.patch("/user-role/:id", authMiddleware, isAdminMiddleware, updateRoleValidator, updateRole);
 // ----------- DELETE ACCOUNT ----------- //
-router.delete("/", remove);
+router.delete("/", authMiddleware, remove);
 
 export default router;

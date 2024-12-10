@@ -23,6 +23,10 @@ export const authQueries = () => {
 		return `SELECT id_role FROM roles WHERE name="${role_name}"`;
 	};
 
+	const GET_ROLE_BY_ID = (id_role) => {
+		return `SELECT name FROM roles WHERE id_role=${id_role}`;
+	};
+
 	const CREATE_USER = (username, surname, firstname, email, password, id_role) => {
 		return `INSERT INTO users(username, surname, firstname, email, password, id_role) VALUES ("${username}","${surname}","${firstname}","${email}","${password}",${id_role})`;
 	};
@@ -50,6 +54,7 @@ export const authQueries = () => {
 		FIND_USER_WITH_HASH,
 		FIND_USER_WITH_ID,
 		GET_ROLE,
+		GET_ROLE_BY_ID,
 		CREATE_USER,
 		UPDATE_USER_HASH,
 		UPDATE_USER_PASSWORD_WITH_HASH,

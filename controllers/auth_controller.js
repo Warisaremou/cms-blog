@@ -4,7 +4,7 @@ import { db } from "../config/database.js";
 import { transport } from "../config/email.js";
 import { authQueries } from "../database/queries/auth_queries.js";
 import { hashHelper, pagination, randomStringGenerator } from "../helpers.js";
-import { decodeToken, findUser, userRole } from "../services/auth_service.js";
+import { findUser, userRole } from "../services/auth_service.js";
 
 const {
 	CREATE_USER,
@@ -121,6 +121,7 @@ const login = async (req, res) => {
 					avatar: userData.avatar,
 					date_of_birth: userData.date_of_birth,
 					description: userData.description,
+					id_role: userData.id_role,
 				},
 				process.env.AUTH_JWT_SECRET,
 				{
@@ -242,20 +243,13 @@ const resetPassword = async (req, res) => {
 };
 
 /**
- * FUNCTION TO RESET PASSWORD
+ * FUNCTION TO GET USER PROFILE USING TOKEN IN HEADER AUTHORIZATION
  */
 const getMe = async (req, res) => {
-	const token = await req.headers.authorization.slice(7);
-
-	const isValidToken = await decodeToken(token);
-
-	if (isValidToken.isError) {
-		return res.status(401).json({
-			message: "Invalid token",
-		});
-	}
-
-	res.json(isValidToken.data);
+	const userData = await req.user;
+	res.json({
+		data: userData,
+	});
 };
 
 /**
@@ -339,15 +333,8 @@ const updateRole = async (req, res) => {
  * FUNCTION TO DELETE ACCOUNT
  */
 const remove = async (req, res) => {
-	const token = await req.headers.authorization.slice(7);
-	const isValidToken = await decodeToken(token);
-	const user_email = isValidToken.data.email;
-
-	if (isValidToken.isError) {
-		return res.status(401).json({
-			message: "Invalid token",
-		});
-	}
+	const userData = await req.user;
+	const user_email = userData.email;
 
 	const existingUserWithEmail = await findUserWithEmail(user_email);
 
@@ -364,4 +351,4 @@ const remove = async (req, res) => {
 	});
 };
 
-export { forgotPassword, getMe, getUsers, login, register, resetPassword, update, updateRole, remove };
+export { forgotPassword, getMe, getUsers, login, register, remove, resetPassword, update, updateRole };
