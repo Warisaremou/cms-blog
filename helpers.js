@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
  * Helper function to manage pagination
  */
 export const pagination = async (page = 1) => {
-	const per_page = 5;
+	const per_page = 6;
 
 	return {
 		page: (page - 1) * per_page,
