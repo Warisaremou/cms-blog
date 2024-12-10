@@ -6,10 +6,16 @@ import { authQueries } from "../database/queries/auth_queries.js";
 import { hashHelper, pagination, randomStringGenerator } from "../helpers.js";
 import { decodeToken, findUser, userRole } from "../services/auth_service.js";
 
-const { CREATE_USER, UPDATE_USER_HASH, UPDATE_USER_PASSWORD_WITH_HASH, FIND_ALL_USERS, DELETE_USER_ACCOUNT_BY_EMAIL } =
-	authQueries();
+const {
+	CREATE_USER,
+	UPDATE_USER_HASH,
+	UPDATE_USER_PASSWORD_WITH_HASH,
+	UPDATE_USER_ROLE_BY_ID,
+	FIND_ALL_USERS,
+	DELETE_USER_ACCOUNT_BY_EMAIL,
+} = authQueries();
 const { hash, compare } = hashHelper();
-const { findUserWithUsername, findUserWithEmail, findUserWithHash } = findUser();
+const { findUserWithUsername, findUserWithEmail, findUserWithHash, findUserWithId } = findUser();
 
 /**
  * FUNCTION TO REGISTER A NEW USER
@@ -293,6 +299,43 @@ const getUsers = async (req, res) => {
 const update = async (req, res) => {};
 
 /**
+ * FUNCTION TO UPDATE A USER ROLE BY ID
+ */
+const updateRole = async (req, res) => {
+	const result = validationResult(req);
+
+	// Check validation
+	if (!result.isEmpty()) {
+		return res.status(400).json({
+			message: result.errors,
+		});
+	}
+
+	try {
+		const id_role = await req.body.id_role;
+		const id_user = await req.params.id;
+
+		// Check if user already exist before updating his email
+		const userExist = await findUserWithId(id_user);
+
+		if (!userExist.exist) {
+			return res.status(400).json({
+				message: "User not found",
+			});
+		}
+
+		await db.execute(UPDATE_USER_ROLE_BY_ID(id_user, id_role));
+		res.json({
+			message: "User's role update successfuly",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+
+/**
  * FUNCTION TO DELETE ACCOUNT
  */
 const remove = async (req, res) => {
@@ -321,4 +364,4 @@ const remove = async (req, res) => {
 	});
 };
 
-export { forgotPassword, getMe, getUsers, login, register, resetPassword, update, remove };
+export { forgotPassword, getMe, getUsers, login, register, resetPassword, update, updateRole, remove };
