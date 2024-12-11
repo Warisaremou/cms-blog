@@ -4,30 +4,31 @@ import { commentQueries } from "../database/queries/comment_queries.js";
 import { pagination } from "../helpers.js";
 import { commentExist } from "../services/comment_service.js";
 
-const {GET_ALL_COMMENTS,GET_COMMENT_BY_ID,ADD_COMMENT,UPDATE_COMMENT_BY_ID,DELETE_COMMENT_BY_ID}=commentQueries()
+const { GET_ALL_COMMENTS, GET_COMMENT_BY_ID, ADD_COMMENT, UPDATE_COMMENT_BY_ID, DELETE_COMMENT_BY_ID } =
+	commentQueries();
 
 /**
  * FUNCTION TO GET ALL COMMENTS
-*/
-const getAll = async(req, res) => {
-    try {
-        const { page, currentPage, per_page } = await pagination(req.query.page);
+ */
+const getAll = async (req, res) => {
+	try {
+		const { page, currentPage, per_page } = await pagination(req.query.page);
 
 		const [data] = await db.execute(GET_ALL_COMMENTS, [per_page, page]);
 
-      return res.json({
+		return res.json({
 			data: data,
 			meta: {
 				page: currentPage,
 				per_page,
 			},
 		});
-    } catch (error) {
+	} catch (error) {
 		return res.status(500).json({
 			message: error.message,
 		});
-    }
-}
+	}
+};
 
 /**
  * FUNCTION TO GET A COMMENT BY ID
@@ -59,10 +60,10 @@ const getOne = async (req, res) => {
  */
 const create = async (req, res) => {
 	const result = await validationResult(req);
-	const {content,id_post} = req.body
+	const { content, id_post } = req.body;
 	const userData = await req.user;
 
-    // Check validation
+	// Check validation
 	if (!result.isEmpty()) {
 		return res.status(400).json({
 			message: result.errors,
@@ -143,4 +144,4 @@ const remove = async (req, res) => {
 	}
 };
 
-export {getAll,getOne,create,update,remove}
+export { getAll, getOne, create, update, remove };

@@ -11,12 +11,13 @@ const createCommentValidation = [
 		})
 		.withMessage("comment content must be at least 3 characters")
 		.trim(),
-		body("id_post")
+	body("id_post")
 		.notEmpty({
 			ignore_whitespace: true,
 		})
 		.withMessage("id_post is required")
-		.isNumeric().withMessage("id_post must be a number"),
+		.isNumeric()
+		.withMessage("id_post must be a number"),
 ];
 
 const updateCommentValidation = [
@@ -29,7 +30,7 @@ const updateCommentValidation = [
 			min: 3,
 		})
 		.withMessage("comment content must be at least 3 characters")
-		.trim()
+		.trim(),
 ];
 
 export { createCommentValidation, updateCommentValidation };
