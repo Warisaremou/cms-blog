@@ -28,7 +28,7 @@ export async function initDatabase() {
 
 		// -------- Initialize posts table -------- //
 		await db.query(
-			`CREATE TABLE posts (id_post INT AUTO_INCREMENT NOT NULL UNIQUE, title VARCHAR(100) NOT NULL, image TEXT NOT NULL, content TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, deleted_at DATETIME DEFAULT NULL, PRIMARY KEY (id_post), id_user INT NOT NULL, FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE)`
+			`CREATE TABLE posts (id_post INT AUTO_INCREMENT NOT NULL UNIQUE, title VARCHAR(100) NOT NULL, image TEXT , content TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, deleted_at DATETIME DEFAULT NULL, PRIMARY KEY (id_post), id_user INT NOT NULL, FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE)`
 		);
 
 		// -------- Initialize post_category table -------- //

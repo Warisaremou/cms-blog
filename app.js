@@ -11,6 +11,8 @@ import { transport } from "./config/email.js";
 import { hbsOptions } from "./config/hbs-options.js";
 import authRouter from "./routes/auth.js";
 import categoryRouter from "./routes/categories.js";
+import commentRouter from "./routes/comments.js";
+import postRouter from "./routes/posts.js";
 import indexRouter from "./routes/index.js";
 
 const app = express();
@@ -35,5 +37,7 @@ app.use(cookieParser());
 app.use("/", indexRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/categories", categoryRouter);
+app.use("/api/comments", commentRouter);
+app.use("/api/posts", postRouter);
 
 export default app;
