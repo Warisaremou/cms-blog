@@ -14,8 +14,8 @@ const transport = nodemailer.createTransport({
 	tls: {
 		rejectUnauthorized: process.env.SMTP_IGNORE_TLS === "true",
 	},
-	logger: true,
-	debug: true,
+	// logger: true,
+	// debug: true,
 });
 
 export { transport };

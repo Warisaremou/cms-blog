@@ -116,4 +116,19 @@ const resetPasswordValidator = [
 		.trim(),
 ];
 
-export { registerValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator };
+const updateRoleValidator = [
+	body("id_role")
+		.notEmpty({
+			ignore_whitespace: true,
+		})
+		.withMessage("role id is required")
+		.custom((value) => {
+			if (typeof value == "string") {
+				throw new Error("role id must be a number");
+			} else {
+				return true;
+			}
+		}),
+];
+
+export { registerValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, updateRoleValidator };

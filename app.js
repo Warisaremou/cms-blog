@@ -4,16 +4,18 @@ import express from "express";
 import logger from "morgan";
 import hbs from "nodemailer-express-handlebars";
 import path from "path";
+import swaggerUi from "swagger-ui-express";
 import { fileURLToPath } from "url";
 import { corsOptions } from "./config/cors.js";
 import { connect } from "./config/database.js";
 import { transport } from "./config/email.js";
 import { hbsOptions } from "./config/hbs-options.js";
+import { swaggerDocument } from "./config/swagger.js";
 import authRouter from "./routes/auth.js";
 import categoryRouter from "./routes/categories.js";
 import commentRouter from "./routes/comments.js";
-import postRouter from "./routes/posts.js";
 import indexRouter from "./routes/index.js";
+import postRouter from "./routes/posts.js";
 
 const app = express();
 connect();
@@ -30,6 +32,13 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(
+	"/api-docs",
+	swaggerUi.serve,
+	swaggerUi.setup(swaggerDocument, {
+		explorer: true,
+	})
+);
 
 /**
  * ROUTES

@@ -3,12 +3,19 @@ import jwt from "jsonwebtoken";
 import { db } from "../config/database.js";
 import { transport } from "../config/email.js";
 import { authQueries } from "../database/queries/auth_queries.js";
-import { hashHelper, randomStringGenerator } from "../helpers.js";
+import { hashHelper, pagination, randomStringGenerator } from "../helpers.js";
 import { findUser, userRole } from "../services/auth_service.js";
 
-const { CREATE_USER, UPDATE_USER_HASH, UPDATE_USER_PASSWORD_WITH_HASH } = authQueries();
+const {
+	CREATE_USER,
+	UPDATE_USER_HASH,
+	UPDATE_USER_PASSWORD_WITH_HASH,
+	UPDATE_USER_ROLE_BY_ID,
+	FIND_ALL_USERS,
+	DELETE_USER_ACCOUNT_BY_EMAIL,
+} = authQueries();
 const { hash, compare } = hashHelper();
-const { findUserWithUsername, findUserWithEmail, findUserWithHash } = findUser();
+const { findUserWithUsername, findUserWithEmail, findUserWithHash, findUserWithId } = findUser();
 
 /**
  * FUNCTION TO REGISTER A NEW USER
@@ -44,7 +51,7 @@ const register = async (req, res) => {
 		// Hash submitted password
 		const hashedPassword = await hash(password);
 
-		// Get id of the role with by name user from the db
+		// Get id of the role with the name user from the db
 		const isRoleExist = await userRole("user");
 
 		if (!isRoleExist.exist) {
@@ -53,8 +60,9 @@ const register = async (req, res) => {
 			});
 		}
 
-		await db.execute(CREATE_USER(username, surname, firstname, email, hashedPassword, isRoleExist.id_role));
+		await db.execute(CREATE_USER, [username, surname, firstname, email, hashedPassword, isRoleExist.id_role]);
 
+		return res.status(201).json({
 		return res.status(201).json({
 			message: "Account created",
 		});
@@ -114,6 +122,7 @@ const login = async (req, res) => {
 					avatar: userData.avatar,
 					date_of_birth: userData.date_of_birth,
 					description: userData.description,
+					id_role: userData.id_role,
 				},
 				process.env.AUTH_JWT_SECRET,
 				{
@@ -122,10 +131,12 @@ const login = async (req, res) => {
 			);
 
 			return res.json({
+			return res.json({
 				message: "Connected",
 				token,
 			});
 		} else {
+			return res.status(400).json({
 			return res.status(400).json({
 				message: "Invalid credentials",
 			});
@@ -164,7 +175,7 @@ const forgotPassword = async (req, res) => {
 		// Generate hash in url query param
 		const generatedHash = await randomStringGenerator();
 		// Insert generatedHash in the user's data
-		await db.execute(UPDATE_USER_HASH(generatedHash, email));
+		await db.execute(UPDATE_USER_HASH, [generatedHash, email]);
 
 		// Send an email to the user
 		await transport
@@ -184,7 +195,7 @@ const forgotPassword = async (req, res) => {
 				});
 			})
 			.catch((error) => {
-				res.status(500).json({
+				return res.status(500).json({
 					message: error.messag,
 				});
 			});
@@ -222,9 +233,9 @@ const resetPassword = async (req, res) => {
 		// Hash submitted password
 		const hashedPassword = await hash(password);
 
-		await db.execute(UPDATE_USER_PASSWORD_WITH_HASH(hashValue, hashedPassword));
+		await db.execute(UPDATE_USER_PASSWORD_WITH_HASH, [hashedPassword, hashValue]);
 
-		res.status(201).json({
+		return res.status(201).json({
 			message: "Password reseted successfully",
 		});
 	} catch (error) {
@@ -235,20 +246,113 @@ const resetPassword = async (req, res) => {
 };
 
 /**
- * FUNCTION TO RESET PASSWORD
+ * FUNCTION TO GET USER PROFILE USING TOKEN IN HEADER AUTHORIZATION
  */
 const getMe = async (req, res) => {
-	const token = await req.headers.authorization.slice(7);
-	await jwt.verify(token, process.env.AUTH_JWT_SECRET, (error, decoded) => {
-		// console.log(error);
-		if (error) {
-			return res.status(401).json({
-				message: "Invalid token",
-			});
-		}
+	const userData = await req.user;
 
-		res.json(decoded);
+	return res.json({
+		data: userData,
 	});
 };
 
-export { forgotPassword, getMe, login, register, resetPassword };
+/**
+ * FUNCTION TO GET ALL USERS(ONLY ADMIN HAVE ACCESS)
+ */
+const getUsers = async (req, res) => {
+	try {
+		const { page, currentPage } = await pagination(req.query.page);
+
+		const [data] = await db.execute(FIND_ALL_USERS, [10, page]);
+
+		// Get id of the role with the name admin from the db
+		const isRoleExist = await userRole("admin");
+
+		if (!isRoleExist.exist) {
+			return res.status(404).json({
+				message: "User's role not found",
+			});
+		}
+
+		// Filter data to remove admin users from the list
+		const usersList = data.filter((user) => user.id_role !== isRoleExist.id_role);
+
+		return res.json({
+			data: usersList,
+			meta: {
+				page: currentPage,
+				per_page: 10,
+			},
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+
+/**
+ * FUNCTION TO UPDATE USER PROFILE
+ */
+const update = async (req, res) => {};
+
+/**
+ * FUNCTION TO UPDATE A USER ROLE BY ID
+ */
+const updateRole = async (req, res) => {
+	const result = validationResult(req);
+
+	// Check validation
+	if (!result.isEmpty()) {
+		return res.status(400).json({
+			message: result.errors,
+		});
+	}
+
+	try {
+		const id_role = await req.body.id_role;
+		const id_user = await req.params.id;
+
+		// Check if user already exist before updating his email
+		const userExist = await findUserWithId(id_user);
+
+		if (!userExist.exist) {
+			return res.status(400).json({
+				message: "User not found",
+			});
+		}
+
+		await db.execute(UPDATE_USER_ROLE_BY_ID, [id_role, id_user]);
+		return res.json({
+			message: "User's role update successfuly",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+
+/**
+ * FUNCTION TO DELETE ACCOUNT
+ */
+const remove = async (req, res) => {
+	const userData = await req.user;
+	const user_email = userData.email;
+
+	const existingUserWithEmail = await findUserWithEmail(user_email);
+
+	if (!existingUserWithEmail.exist) {
+		return res.status(400).json({
+			message: "Account not found",
+		});
+	}
+
+	await db.execute(DELETE_USER_ACCOUNT_BY_EMAIL, [user_email]);
+
+	return res.json({
+		message: "Account deleted successfuly",
+	});
+};
+
+export { forgotPassword, getMe, getUsers, login, register, remove, resetPassword, update, updateRole };
