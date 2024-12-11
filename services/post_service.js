@@ -10,7 +10,7 @@ import { postQueries } from "../database/queries/post_queries.js";
  */
 const postExist = async (id_post) => {
 	const { GET_POST_BY_ID } = await postQueries();
-	const [data] = await db.execute(GET_POST_BY_ID(id_post));
+	const [data] = await db.execute(GET_POST_BY_ID, [id_post]);
 
 	if (data.length === 0) {
 		return {

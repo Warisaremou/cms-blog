@@ -8,7 +8,7 @@ export const postQueries = () => {
   // const ADD_POST_CATEGORY = (id_post,id_category) => {
 	// 	return `INSERT INTO post_category(id_post,id_category) VALUES (?, ?)`;
 	// };
-	const UPDATE_POST_BY_ID = `UPDATE posts SET (?, ?, ? ) WHERE id_post= ?`;
+	const UPDATE_POST_BY_ID = `UPDATE posts SET title = ?, image = ?, content = ? WHERE id_post = ?`;
 	
 	const DELETE_POST_BY_ID =`DELETE FROM posts WHERE id_post= ?`;
 

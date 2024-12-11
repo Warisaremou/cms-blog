@@ -5,7 +5,7 @@ export const commentQueries = () => {
 
 	const ADD_COMMENT = `INSERT INTO comments(content, id_user, id_post) VALUES (?, ?, ?)`;
 
-	const UPDATE_COMMENT_BY_ID = `UPDATE comments SET ? WHERE id_comment= ?`;
+	const UPDATE_COMMENT_BY_ID = `UPDATE comments SET content = ? WHERE id_comment= ?`;
 
 	const DELETE_COMMENT_BY_ID = `DELETE FROM comments WHERE id_comment= ?`;
 

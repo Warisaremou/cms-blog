@@ -116,9 +116,14 @@ const update = async (req, res) => {
 	}
 
 	// Check if the post already exist
-	if (isPostExist.exist) {
+	if (!isPostExist.exist) {
+		return res.status(404).json({
+			message: "Post not found",
+		});
+	}
+
 		try {
-			await db.execute(UPDATE_POST_BY_ID, [id_post, title, image, content]);
+			await db.execute(UPDATE_POST_BY_ID, [title, image, content, id_post]);
 	 
 
 			return res.json({
@@ -130,11 +135,7 @@ const update = async (req, res) => {
 				message: error.message,
 			});
 		}
-	} else {
-		return res.status(404).json({
-			message: "Post not found",
-		});
-	}
+	
 };
 
 /**
