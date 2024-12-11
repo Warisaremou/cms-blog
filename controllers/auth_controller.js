@@ -114,13 +114,7 @@ const login = async (req, res) => {
 				{
 					id_user: userData.id_user,
 					username: userData.username,
-					surname: userData.surname,
-					firstname: userData.firstname,
 					email: userData.email,
-					address: userData.address,
-					avatar: userData.avatar,
-					date_of_birth: userData.date_of_birth,
-					description: userData.description,
 					id_role: userData.id_role,
 				},
 				process.env.AUTH_JWT_SECRET,
@@ -248,8 +242,19 @@ const resetPassword = async (req, res) => {
 const getMe = async (req, res) => {
 	const userData = await req.user;
 
+	const isAccountExist = await findUserWithEmail(userData.email);
+
+	if (!isAccountExist) {
+		return res.status(404).json({
+			message: "Account not found",
+		});
+	}
+
+	// Destructuring data to remove to remove password from property
+	const { password, ...trimedData } = isAccountExist.data;
+
 	return res.json({
-		data: userData,
+		data: trimedData,
 	});
 };
 
@@ -273,6 +278,11 @@ const getUsers = async (req, res) => {
 
 		// Filter data to remove admin users from the list
 		const usersList = data.filter((user) => user.id_role !== isRoleExist.id_role);
+
+		// Remove password property from each user data
+		await usersList.forEach((user) => {
+			delete user.password;
+		});
 
 		return res.json({
 			data: usersList,
