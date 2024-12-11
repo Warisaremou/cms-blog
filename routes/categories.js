@@ -6,6 +6,26 @@ import { createCategoryValidation } from "../validators/category_validator.js";
 const router = express.Router();
 
 /**
+ * @swagger
+ * tags:
+ *  name: Catgeories
+ *  description: categories route
+ * /api/categories:
+ *  get:
+ *    summary: List all categories
+ *    tags: [Categories]
+ *    responses:
+ *      200:
+ *        description: The list of the categories
+ *        content:
+ *          application/json
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Category'
+ */
+
+/**
  * CATEGORIES ROUTES
  */
 
