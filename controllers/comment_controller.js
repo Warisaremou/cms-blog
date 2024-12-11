@@ -59,7 +59,8 @@ const getOne = async (req, res) => {
  */
 const create = async (req, res) => {
 	const result = await validationResult(req);
-    const {content,id_post} = req.body
+	const {content,id_post} = req.body
+	const userData = await req.user;
 
     // Check validation
 	if (!result.isEmpty()) {
@@ -69,7 +70,7 @@ const create = async (req, res) => {
 	}
 
 	try {
-		await db.execute(ADD_COMMENT, [content, 2, id_post]);
+		await db.execute(ADD_COMMENT, [content, userData.id_user, id_post]);
 
 		return res.status(201).json({
 			message: "Comment created",
