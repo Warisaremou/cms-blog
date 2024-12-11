@@ -31,8 +31,6 @@ Start the server
 ```bash
   npm run start
 ```
-<<<<<<< HEAD
-=======
 
 Run migration
 
@@ -51,4 +49,3 @@ Generate a JWT secret key
 ```bash
   openssl rand -hex 48
 ```
->>>>>>> main
