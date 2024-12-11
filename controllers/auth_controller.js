@@ -63,7 +63,6 @@ const register = async (req, res) => {
 		await db.execute(CREATE_USER, [username, surname, firstname, email, hashedPassword, isRoleExist.id_role]);
 
 		return res.status(201).json({
-		return res.status(201).json({
 			message: "Account created",
 		});
 	} catch (error) {
@@ -131,12 +130,10 @@ const login = async (req, res) => {
 			);
 
 			return res.json({
-			return res.json({
 				message: "Connected",
 				token,
 			});
 		} else {
-			return res.status(400).json({
 			return res.status(400).json({
 				message: "Invalid credentials",
 			});
