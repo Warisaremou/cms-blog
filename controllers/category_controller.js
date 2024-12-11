@@ -12,15 +12,15 @@ const { GET_ALL_CATEGORIES, GET_CATEGORY_BY_ID, ADD_CATEGORY, UPDATE_CATEGORY_BY
  */
 const getAll = async (req, res) => {
 	try {
-		const { page, currentPage, per_page } = await pagination(req.query.page);
+		const { page, currentPage } = await pagination(req.query.page);
 
-		const [data] = await db.execute(GET_ALL_CATEGORIES, [per_page, page]);
+		const [data] = await db.execute(GET_ALL_CATEGORIES, [10, page]);
 
-		res.json({
+		return res.json({
 			data: data,
 			meta: {
 				page: currentPage,
-				per_page,
+				per_page: 10,
 			},
 		});
 	} catch (error) {
@@ -71,7 +71,7 @@ const create = async (req, res) => {
 	try {
 		await db.execute(ADD_CATEGORY, [req.body.name]);
 
-		res.status(201).json({
+		return res.status(201).json({
 			message: "Category created",
 		});
 	} catch (error) {
@@ -97,21 +97,21 @@ const update = async (req, res) => {
 	}
 
 	// Check if the category already exist
-	if (isCategoryExist.exist) {
-		try {
-			await db.execute(UPDATE_CATEGORY_BY_ID, [req.body.name, id_category]);
-
-			res.json({
-				message: "Category updated",
-			});
-		} catch (error) {
-			return res.status(500).json({
-				message: error.message,
-			});
-		}
-	} else {
-		res.status(404).json({
+	if (!isCategoryExist.exist) {
+		return res.status(404).json({
 			message: "Category not found",
+		});
+	}
+
+	try {
+		await db.execute(UPDATE_CATEGORY_BY_ID, [req.body.name, id_category]);
+
+		return res.json({
+			message: "Category updated",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
 		});
 	}
 };
@@ -123,21 +123,21 @@ const remove = async (req, res) => {
 	const id_category = await req.params.id;
 	const isCategoryExist = await categoryExist(id_category);
 
-	if (isCategoryExist.exist) {
-		try {
-			await db.execute(DELETE_CATEGORY_BY_ID, [id_category]);
-
-			res.json({
-				message: "Category deleted",
-			});
-		} catch (error) {
-			return res.status(500).json({
-				message: error.message,
-			});
-		}
-	} else {
-		res.status(404).json({
+	if (!isCategoryExist.exist) {
+		return res.status(404).json({
 			message: "Category not found",
+		});
+	}
+
+	try {
+		await db.execute(DELETE_CATEGORY_BY_ID, [id_category]);
+
+		return res.json({
+			message: "Category deleted",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
 		});
 	}
 };

@@ -9,7 +9,7 @@ const { GET_ROLE, FIND_USER_WITH_EMAIL, FIND_USER_WITH_USERNAME, FIND_USER_WITH_
  * This function send a request to the roles table with the provided role name and return the role id
  */
 const userRole = async (role_name) => {
-	const [data] = await db.execute(GET_ROLE(role_name));
+	const [data] = await db.execute(GET_ROLE, [role_name]);
 
 	if (data.length === 0) {
 		return {
@@ -28,7 +28,7 @@ const userRole = async (role_name) => {
  */
 const findUser = () => {
 	const findUserWithUsername = async (username) => {
-		const [data] = await db.execute(FIND_USER_WITH_USERNAME(username));
+		const [data] = await db.execute(FIND_USER_WITH_USERNAME, [username]);
 
 		if (data.length === 0) {
 			return {
@@ -43,7 +43,7 @@ const findUser = () => {
 	};
 
 	const findUserWithEmail = async (email) => {
-		const [data] = await db.execute(FIND_USER_WITH_EMAIL(email));
+		const [data] = await db.execute(FIND_USER_WITH_EMAIL, [email]);
 
 		if (data.length === 0) {
 			return {
@@ -58,7 +58,7 @@ const findUser = () => {
 	};
 
 	const findUserWithHash = async (hash) => {
-		const [data] = await db.execute(FIND_USER_WITH_HASH(hash));
+		const [data] = await db.execute(FIND_USER_WITH_HASH, [hash]);
 
 		if (data.length === 0) {
 			return false;
@@ -68,7 +68,7 @@ const findUser = () => {
 	};
 
 	const findUserWithId = async (id_user) => {
-		const [data] = await db.execute(FIND_USER_WITH_ID(id_user));
+		const [data] = await db.execute(FIND_USER_WITH_ID, [id_user]);
 
 		if (data.length === 0) {
 			return {

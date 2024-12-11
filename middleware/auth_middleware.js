@@ -10,7 +10,7 @@ const authMiddleware = async (req, res, next) => {
 		const token = await req.headers?.authorization?.split(" ")[1];
 
 		if (!token) {
-			res.status(403).json({
+			return res.status(403).json({
 				message: "Token not found",
 			});
 		}
@@ -23,10 +23,10 @@ const authMiddleware = async (req, res, next) => {
 			});
 		}
 
-		req.user = await isValidToken.data;
+		req.user = isValidToken.data;
 		next();
 	} catch (error) {
-		res.status(401).json({ error });
+		return res.status(401).json({ error });
 	}
 };
 
@@ -37,7 +37,7 @@ const isAdminMiddleware = async (req, res, next) => {
 	const { GET_ROLE_BY_ID } = authQueries();
 	try {
 		const userData = await req.user;
-		const [role] = await db.execute(GET_ROLE_BY_ID(userData.id_role));
+		const [role] = await db.execute(GET_ROLE_BY_ID, [userData.id_role]);
 
 		if (role[0].name !== "admin") {
 			return res.status(401).json({
@@ -47,7 +47,7 @@ const isAdminMiddleware = async (req, res, next) => {
 
 		next();
 	} catch (error) {
-		res.status(401).json({ error });
+		return res.status(401).json({ error });
 	}
 };
 

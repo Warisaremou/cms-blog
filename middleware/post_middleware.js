@@ -19,7 +19,7 @@ const isModeratorOrPostOwner = async (req, res, next) => {
 		}
 
 		const userData = await req.user;
-		const [role] = await db.execute(GET_ROLE_BY_ID(userData.id_role));
+		const [role] = await db.execute(GET_ROLE_BY_ID, [userData.id_role]);
 
 		if (role[0].name !== "moderator" || userData.id_user !== isPostExist.data.id_user) {
 			return res.status(401).json({

@@ -60,9 +60,9 @@ const register = async (req, res) => {
 			});
 		}
 
-		await db.execute(CREATE_USER(username, surname, firstname, email, hashedPassword, isRoleExist.id_role));
+		await db.execute(CREATE_USER, [username, surname, firstname, email, hashedPassword, isRoleExist.id_role]);
 
-		res.status(201).json({
+		return res.status(201).json({
 			message: "Account created",
 		});
 	} catch (error) {
@@ -129,12 +129,12 @@ const login = async (req, res) => {
 				}
 			);
 
-			res.json({
+			return res.json({
 				message: "Connected",
 				token,
 			});
 		} else {
-			res.status(400).json({
+			return res.status(400).json({
 				message: "Invalid credentials",
 			});
 		}
@@ -172,7 +172,7 @@ const forgotPassword = async (req, res) => {
 		// Generate hash in url query param
 		const generatedHash = await randomStringGenerator();
 		// Insert generatedHash in the user's data
-		await db.execute(UPDATE_USER_HASH(generatedHash, email));
+		await db.execute(UPDATE_USER_HASH, [generatedHash, email]);
 
 		// Send an email to the user
 		await transport
@@ -186,13 +186,12 @@ const forgotPassword = async (req, res) => {
 				},
 			})
 			.then(() => {
-				// console.log("*****", response);
-				res.status(201).json({
+				return res.status(201).json({
 					message: "An email has been send to you",
 				});
 			})
 			.catch((error) => {
-				res.status(500).json({
+				return res.status(500).json({
 					message: error.messag,
 				});
 			});
@@ -230,9 +229,9 @@ const resetPassword = async (req, res) => {
 		// Hash submitted password
 		const hashedPassword = await hash(password);
 
-		await db.execute(UPDATE_USER_PASSWORD_WITH_HASH(hashValue, hashedPassword));
+		await db.execute(UPDATE_USER_PASSWORD_WITH_HASH, [hashedPassword, hashValue]);
 
-		res.status(201).json({
+		return res.status(201).json({
 			message: "Password reseted successfully",
 		});
 	} catch (error) {
@@ -247,7 +246,8 @@ const resetPassword = async (req, res) => {
  */
 const getMe = async (req, res) => {
 	const userData = await req.user;
-	res.json({
+
+	return res.json({
 		data: userData,
 	});
 };
@@ -257,9 +257,9 @@ const getMe = async (req, res) => {
  */
 const getUsers = async (req, res) => {
 	try {
-		const { page, currentPage, per_page } = await pagination(req.query.page);
+		const { page, currentPage } = await pagination(req.query.page);
 
-		const [data] = await db.execute(FIND_ALL_USERS(per_page, page));
+		const [data] = await db.execute(FIND_ALL_USERS, [10, page]);
 
 		// Get id of the role with the name admin from the db
 		const isRoleExist = await userRole("admin");
@@ -273,11 +273,11 @@ const getUsers = async (req, res) => {
 		// Filter data to remove admin users from the list
 		const usersList = data.filter((user) => user.id_role !== isRoleExist.id_role);
 
-		res.json({
+		return res.json({
 			data: usersList,
 			meta: {
 				page: currentPage,
-				per_page,
+				per_page: 10,
 			},
 		});
 	} catch (error) {
@@ -318,8 +318,8 @@ const updateRole = async (req, res) => {
 			});
 		}
 
-		await db.execute(UPDATE_USER_ROLE_BY_ID(id_user, id_role));
-		res.json({
+		await db.execute(UPDATE_USER_ROLE_BY_ID, [id_role, id_user]);
+		return res.json({
 			message: "User's role update successfuly",
 		});
 	} catch (error) {
@@ -344,9 +344,9 @@ const remove = async (req, res) => {
 		});
 	}
 
-	await db.execute(DELETE_USER_ACCOUNT_BY_EMAIL(user_email));
+	await db.execute(DELETE_USER_ACCOUNT_BY_EMAIL, [user_email]);
 
-	res.json({
+	return res.json({
 		message: "Account deleted successfuly",
 	});
 };
