@@ -22,7 +22,9 @@ const router = express.Router();
  *            schema:
  *              type: array
  *              items:
- *                $ref: '#/components/schemas/Category'
+ *                type: object
+ *                  properties:
+ *                    id:
  */
 
 /**

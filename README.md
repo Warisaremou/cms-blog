@@ -31,3 +31,21 @@ Start the server
 ```bash
   npm run start
 ```
+
+Run migration
+
+```bash
+  npm run migration
+```
+
+Run seeder
+
+```bash
+  npm run seeder
+```
+
+Generate a JWT secret key
+
+```bash
+  openssl rand -hex 48
+```
