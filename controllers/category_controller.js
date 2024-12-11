@@ -14,7 +14,7 @@ const getAll = async (req, res) => {
 	try {
 		const { page, currentPage, per_page } = await pagination(req.query.page);
 
-		const [data] = await db.execute(GET_ALL_CATEGORIES(per_page, page));
+		const [data] = await db.execute(GET_ALL_CATEGORIES, [per_page, page]);
 
 		res.json({
 			data: data,
@@ -37,7 +37,7 @@ const getOne = async (req, res) => {
 	const id_category = await req.params.id;
 
 	try {
-		const [data] = await db.execute(GET_CATEGORY_BY_ID(id_category));
+		const [data] = await db.execute(GET_CATEGORY_BY_ID, [id_category]);
 
 		if (data.length === 0) {
 			return res.status(404).json({
@@ -69,7 +69,7 @@ const create = async (req, res) => {
 	}
 
 	try {
-		await db.execute(ADD_CATEGORY(req.body.name));
+		await db.execute(ADD_CATEGORY, [req.body.name]);
 
 		res.status(201).json({
 			message: "Category created",
@@ -99,11 +99,10 @@ const update = async (req, res) => {
 	// Check if the category already exist
 	if (isCategoryExist.exist) {
 		try {
-			await db.execute(UPDATE_CATEGORY_BY_ID(id_category, req.body.name));
+			await db.execute(UPDATE_CATEGORY_BY_ID, [req.body.name, id_category]);
 
 			res.json({
 				message: "Category updated",
-				data: isCategoryExist.data,
 			});
 		} catch (error) {
 			return res.status(500).json({
@@ -126,7 +125,7 @@ const remove = async (req, res) => {
 
 	if (isCategoryExist.exist) {
 		try {
-			await db.execute(DELETE_CATEGORY_BY_ID(id_category));
+			await db.execute(DELETE_CATEGORY_BY_ID, [id_category]);
 
 			res.json({
 				message: "Category deleted",

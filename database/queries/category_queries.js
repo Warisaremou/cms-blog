@@ -1,23 +1,13 @@
 export const categoryQueries = () => {
-	const GET_ALL_CATEGORIES = (per_page, page) => {
-		return `SELECT * FROM categories LIMIT ${per_page} OFFSET ${page}`;
-	};
+	const GET_ALL_CATEGORIES = `SELECT * FROM categories LIMIT ? OFFSET ?`;
 
-	const GET_CATEGORY_BY_ID = (id_category) => {
-		return `SELECT * FROM categories WHERE id_category=${id_category}`;
-	};
+	const GET_CATEGORY_BY_ID = `SELECT * FROM categories WHERE id_category = ?`;
 
-	const ADD_CATEGORY = (name) => {
-		return `INSERT INTO categories(name) VALUES ('${name}')`;
-	};
+	const ADD_CATEGORY = `INSERT INTO categories(name) VALUES (?)`;
 
-	const UPDATE_CATEGORY_BY_ID = (id_category, name) => {
-		return `UPDATE categories SET name='${name}' WHERE id_category=${id_category}`;
-	};
+	const UPDATE_CATEGORY_BY_ID = `UPDATE categories SET name = ? WHERE id_category = ?`;
 
-	const DELETE_CATEGORY_BY_ID = (id_category) => {
-		return `DELETE FROM categories WHERE id_category=${id_category}`;
-	};
+	const DELETE_CATEGORY_BY_ID = `DELETE FROM categories WHERE id_category = ?`;
 
 	return {
 		GET_ALL_CATEGORIES,
