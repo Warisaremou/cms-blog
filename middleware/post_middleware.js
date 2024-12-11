@@ -13,7 +13,7 @@ const isModeratorOrPostOwner = async (req, res, next) => {
 		const isPostExist = await postExist(id_post);
 
 		if (!isPostExist.exist) {
-			res.status(404).json({
+			return res.status(404).json({
 				message: "Post not found",
 			});
 		}
@@ -29,7 +29,7 @@ const isModeratorOrPostOwner = async (req, res, next) => {
 
 		next();
 	} catch (error) {
-		res.status(401).json({ error });
+		return res.status(401).json({ error });
 	}
 };
 
