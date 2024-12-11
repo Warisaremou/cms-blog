@@ -55,7 +55,7 @@ const register = async (req, res) => {
 
 		await db.execute(CREATE_USER(username, surname, firstname, email, hashedPassword, isRoleExist.id_role));
 
-		res.status(201).json({
+		return res.status(201).json({
 			message: "Account created",
 		});
 	} catch (error) {
@@ -121,12 +121,12 @@ const login = async (req, res) => {
 				}
 			);
 
-			res.json({
+			return res.json({
 				message: "Connected",
 				token,
 			});
 		} else {
-			res.status(400).json({
+			return res.status(400).json({
 				message: "Invalid credentials",
 			});
 		}
@@ -179,7 +179,7 @@ const forgotPassword = async (req, res) => {
 			})
 			.then(() => {
 				// console.log("*****", response);
-				res.status(201).json({
+				return res.status(201).json({
 					message: "An email has been send to you",
 				});
 			})

@@ -3,6 +3,7 @@ import { create, getAll, getOne, remove, update} from "../controllers/post_contr
 import { createPostValidation } from "../validators/post_validator.js";
 
 const router = express.Router();
+// const multer = require('../middleware/multer-config');
 
 /**
  * POSTS ROUTES

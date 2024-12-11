@@ -13,13 +13,13 @@ const getAll = async (req, res) => {
 	try {
 		const { page, currentPage, per_page } = await pagination(req.query.page);
 
-		const [data] = await db.execute(GET_ALL_POSTS((per_page, page)));
+		const [data] = await db.execute(GET_ALL_POSTS, [per_page, page]);
 
-		res.json({
+		return res.json({
 			data: data,
 			meta: {
 				page: currentPage,
-				per_page,
+				per_page
 			},
 		});
 	} catch (error) {
@@ -36,7 +36,7 @@ const getOne = async (req, res) => {
 	const id_post = await req.params.id;
 
 	try {
-		const [data] = await db.execute(GET_POST_BY_ID(id_post));
+		const [data] = await db.execute(GET_POST_BY_ID, [id_post]);
 
 		if (data.length === 0) {
 			return res.status(404).json({
@@ -72,7 +72,7 @@ const create = async (req, res) => {
 		
     // Ajouter les catégories associées dans la table `post_categories`
     if (categories && categories.length > 0) {
-      const [postResult]= await db.execute(ADD_POST(title, image, content, 2));
+      const [postResult]= await db.execute(ADD_POST, [title, image, content, 2]);
     const postId = postResult.insertId; // Récupérer l'id du post nouvellement créé
 
     const values = categories.map((id_category) => [postId, id_category]);
@@ -83,11 +83,11 @@ const create = async (req, res) => {
         `INSERT INTO post_category(id_post, id_category) VALUES ?`,
         [values]
       );
-      res.status(201).json({
+      return res.status(201).json({
         message: "Post created",
       });
     }else{
-      res.status(400)
+      return res.status(400)
 
     }
 
@@ -118,10 +118,10 @@ const update = async (req, res) => {
 	// Check if the post already exist
 	if (isPostExist.exist) {
 		try {
-			await db.execute(UPDATE_POST_BY_ID(id_post,title, image, content));
+			await db.execute(UPDATE_POST_BY_ID, [id_post, title, image, content]);
 	 
 
-			res.json({
+			return res.json({
 				message: "Post updated",
 				//data: isPostExist.data,
 			});
@@ -131,7 +131,7 @@ const update = async (req, res) => {
 			});
 		}
 	} else {
-		res.status(404).json({
+		return res.status(404).json({
 			message: "Post not found",
 		});
 	}
@@ -146,9 +146,9 @@ const remove = async (req, res) => {
 
 	if (isPostExist.exist) {
 		try {
-			await db.execute(DELETE_POST_BY_ID(id_post));
+			await db.execute(DELETE_POST_BY_ID, [id_post]);
 
-			res.json({
+			return res.json({
 				message: "Post deleted",
 			});
 		} catch (error) {
@@ -157,7 +157,7 @@ const remove = async (req, res) => {
 			});
 		}
 	} else {
-		res.status(404).json({
+		return res.status(404).json({
 			message: "Post not found",
 		});
 	}

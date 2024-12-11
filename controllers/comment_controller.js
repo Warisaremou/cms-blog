@@ -13,9 +13,9 @@ const getAll = async(req, res) => {
     try {
         const { page, currentPage, per_page } = await pagination(req.query.page);
 
-		const [data] = await db.execute(GET_ALL_COMMENTS(per_page, page));
+		const [data] = await db.execute(GET_ALL_COMMENTS, [per_page, page]);
 
-        res.json({
+      return res.json({
 			data: data,
 			meta: {
 				page: currentPage,
@@ -36,7 +36,7 @@ const getOne = async (req, res) => {
 	const id_comment = await req.params.id;
 
 	try {
-		const [data] = await db.execute(GET_COMMENT_BY_ID(id_comment));
+		const [data] = await db.execute(GET_COMMENT_BY_ID, [id_comment]);
 
 		if (data.length === 0) {
 			return res.status(404).json({
@@ -69,9 +69,9 @@ const create = async (req, res) => {
 	}
 
 	try {
-		await db.execute(ADD_COMMENT(content, 2, id_post));
+		await db.execute(ADD_COMMENT, [content, 2, id_post]);
 
-		res.status(201).json({
+		return res.status(201).json({
 			message: "Comment created",
 		});
 	} catch (error) {
@@ -99,9 +99,9 @@ const update = async (req, res) => {
 	// Check if the comment already exist
 	if (isCommentExist.exist) {
 		try {
-			await db.execute(UPDATE_COMMENT_BY_ID(req.body.content, id_comment));
+			await db.execute(UPDATE_COMMENT_BY_ID, [req.body.content, id_comment]);
 
-			res.json({
+			return res.json({
 				message: "Comment updated",
 			});
 		} catch (error) {
@@ -110,7 +110,7 @@ const update = async (req, res) => {
 			});
 		}
 	} else {
-		res.status(404).json({
+		return res.status(404).json({
 			message: "Comment not found",
 		});
 	}
@@ -125,9 +125,9 @@ const remove = async (req, res) => {
 
 	if (isCommentExist.exist) {
 		try {
-			await db.execute(DELETE_COMMENT_BY_ID(id_comment));
+			await db.execute(DELETE_COMMENT_BY_ID, [id_comment]);
 
-			res.json({
+			return res.json({
 				message: "Comment deleted",
 			});
 		} catch (error) {
@@ -136,7 +136,7 @@ const remove = async (req, res) => {
 			});
 		}
 	} else {
-		res.status(404).json({
+		return res.status(404).json({
 			message: "Comment not found",
 		});
 	}
