@@ -116,6 +116,14 @@ const resetPasswordValidator = [
 		.trim(),
 ];
 
+const updateProfileValidator = [
+	body("surname").trim(),
+	body("firstname").trim(),
+	body("address").trim(),
+	body("date_of_birth").trim(),
+	body("description").trim(),
+];
+
 const updateRoleValidator = [
 	body("id_role")
 		.notEmpty({
@@ -131,4 +139,11 @@ const updateRoleValidator = [
 		}),
 ];
 
-export { registerValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, updateRoleValidator };
+export {
+	registerValidator,
+	loginValidator,
+	forgotPasswordValidator,
+	updateProfileValidator,
+	resetPasswordValidator,
+	updateRoleValidator,
+};

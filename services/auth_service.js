@@ -70,16 +70,7 @@ const findUser = () => {
 	const findUserWithId = async (id_user) => {
 		const [data] = await db.execute(FIND_USER_WITH_ID, [id_user]);
 
-		if (data.length === 0) {
-			return {
-				exist: false,
-			};
-		} else {
-			return {
-				exist: true,
-				id_user: data[0].id_user,
-			};
-		}
+		return data.length > 0;
 	};
 
 	return {

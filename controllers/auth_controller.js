@@ -7,12 +7,15 @@ import { hashHelper, pagination, randomStringGenerator } from "../helpers.js";
 import { findUser, userRole } from "../services/auth_service.js";
 
 const {
+	GET_ROLE_BY_ID,
 	CREATE_USER,
 	UPDATE_USER_HASH,
 	UPDATE_USER_PASSWORD_WITH_HASH,
 	UPDATE_USER_ROLE_BY_ID,
+	UPDATE_USER_PROFILE,
+	UPDATE_USER_AVATAR,
 	FIND_ALL_USERS,
-	DELETE_USER_ACCOUNT_BY_EMAIL,
+	DELETE_USER_ACCOUNT_BY_USER_ID,
 } = authQueries();
 const { hash, compare } = hashHelper();
 const { findUserWithUsername, findUserWithEmail, findUserWithHash, findUserWithId } = findUser();
@@ -110,7 +113,7 @@ const login = async (req, res) => {
 			}
 
 			// Generate token
-			const token = await jwt.sign(
+			const token = jwt.sign(
 				{
 					id_user: userData.id_user,
 					username: userData.username,
@@ -240,11 +243,11 @@ const resetPassword = async (req, res) => {
  * FUNCTION TO GET USER PROFILE USING TOKEN IN HEADER AUTHORIZATION
  */
 const getMe = async (req, res) => {
-	const userData = await req.user;
+	const { email } = await req.user;
 
-	const isAccountExist = await findUserWithEmail(userData.email);
+	const isAccountExist = await findUserWithEmail(email);
 
-	if (!isAccountExist) {
+	if (!isAccountExist.exist) {
 		return res.status(404).json({
 			message: "Account not found",
 		});
@@ -301,7 +304,42 @@ const getUsers = async (req, res) => {
 /**
  * FUNCTION TO UPDATE USER PROFILE
  */
-const update = async (req, res) => {};
+const update = async (req, res) => {
+	const result = validationResult(req);
+	const { id_user } = await req.user;
+	const { surname, firstname, address, date_of_birth, description } = await req.body;
+
+	// Check validation
+	if (!result.isEmpty()) {
+		return res.status(400).json({
+			message: result.errors,
+		});
+	}
+
+	// Check if account exist
+	const userExist = await findUserWithId(id_user);
+	if (!userExist) {
+		return res.status(400).json({
+			message: "User not found",
+		});
+	}
+
+	try {
+		await db.execute(UPDATE_USER_PROFILE, [surname, firstname, address, date_of_birth, description]);
+		return res.json({
+			message: "Profile updated",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+
+/**
+ * FUNCTION TO UPDATE USER'S AVATAR
+ */
+const updateAvatar = async (req, res) => {};
 
 /**
  * FUNCTION TO UPDATE A USER ROLE BY ID
@@ -323,7 +361,7 @@ const updateRole = async (req, res) => {
 		// Check if user already exist before updating his email
 		const userExist = await findUserWithId(id_user);
 
-		if (!userExist.exist) {
+		if (!userExist) {
 			return res.status(400).json({
 				message: "User not found",
 			});
@@ -344,22 +382,29 @@ const updateRole = async (req, res) => {
  * FUNCTION TO DELETE ACCOUNT
  */
 const remove = async (req, res) => {
-	const userData = await req.user;
-	const user_email = userData.email;
+	const { id_user, id_role } = await req.user;
 
-	const existingUserWithEmail = await findUserWithEmail(user_email);
-
-	if (!existingUserWithEmail.exist) {
+	// Check id account exist
+	const userExist = await findUserWithId(id_user);
+	if (!userExist) {
 		return res.status(400).json({
 			message: "Account not found",
 		});
 	}
 
-	await db.execute(DELETE_USER_ACCOUNT_BY_EMAIL, [user_email]);
+	// Add check to delete others account except admin account
+	const [role] = await db.execute(GET_ROLE_BY_ID, [id_role]);
+	if (role[0].name === "admin") {
+		return res.status(401).json({
+			message: "Cannot delete admin account",
+		});
+	}
+
+	await db.execute(DELETE_USER_ACCOUNT_BY_USER_ID, [id_user]);
 
 	return res.json({
 		message: "Account deleted successfuly",
 	});
 };
 
-export { forgotPassword, getMe, getUsers, login, register, remove, resetPassword, update, updateRole };
+export { forgotPassword, getMe, getUsers, login, register, remove, resetPassword, update, updateAvatar, updateRole };
