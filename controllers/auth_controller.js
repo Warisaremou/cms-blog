@@ -348,10 +348,7 @@ const updateAvatar = async (req, res) => {
 			return res.status(400).json({ error: "Please fill user's avatar" });
 		}
 
-		console.log("Uploaded file", req.file);
 		const result = await uploadToCloudinary(req.file.path);
-
-		console.log(result);
 		await db.execute(UPDATE_USER_AVATAR, [result.secure_url, id_user]);
 
 		return res.json({

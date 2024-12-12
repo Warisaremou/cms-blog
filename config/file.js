@@ -2,7 +2,7 @@ import multer from "multer";
 import path from "path";
 
 const storage = multer.diskStorage({
-	destination: "uploads/",
+	// destination: "uploads/",
 	filename: function (req, file, callback) {
 		const uniqueSuffix = Date.now() + path.extname(file.originalname);
 		callback(null, file.fieldname + "-" + uniqueSuffix);
