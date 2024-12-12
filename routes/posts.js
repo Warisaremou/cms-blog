@@ -1,6 +1,8 @@
 import express from "express";
 import { create, getAll, getOne, remove, update} from "../controllers/post_controllers.js";
 import { createPostValidation } from "../validators/post_validator.js";
+import { authMiddleware } from "../middleware/auth_middleware.js";
+import { isModeratorOrPostOwner } from "../middleware/post_middleware.js";
 
 const router = express.Router();
 // const multer = require('../middleware/multer-config');
@@ -14,10 +16,10 @@ router.get("/", getAll);
 // ----------- GET A POST BY ID ----------- //
 router.get("/:id", getOne);
 // ----------- ADD A POST ----------- //
-router.post("/", createPostValidation, create);
+router.post("/", authMiddleware, createPostValidation, create);
 // ----------- UPDATE A POST BY ID ----------- //
-router.patch("/:id", createPostValidation, update);
+router.patch("/:id", authMiddleware, isModeratorOrPostOwner, createPostValidation, update);
 // ----------- DELETE A POST BY ID ----------- //
-router.delete("/:id", remove);
+router.delete("/:id", authMiddleware, isModeratorOrPostOwner, remove);
 
 export default router;
