@@ -5,11 +5,12 @@ import { pagination } from "../helpers.js";
 import { postExist } from "../services/post_service.js";
 import { uploadToCloudinary } from "../services/upload_service.js";
 
-const {GET_ALL_POSTS, GET_POST_BY_ID, ADD_POST_WITH_IMAGE, UPDATE_POST_BY_ID, DELETE_POST_BY_ID} = postQueries();
+const { GET_ALL_POSTS, GET_POST_BY_ID, ADD_POST, ADD_TO_POST_CATEGORY, UPDATE_POST_BY_ID, DELETE_POST_BY_ID } =
+	postQueries();
 
 /**
  * FUNCTION TO GET ALL POSTS
-*/
+ */
 const getAll = async (req, res) => {
 	try {
 		const { page, currentPage, per_page } = await pagination(req.query.page);
@@ -20,7 +21,7 @@ const getAll = async (req, res) => {
 			data: data,
 			meta: {
 				page: currentPage,
-				per_page
+				per_page,
 			},
 		});
 	} catch (error) {
@@ -55,45 +56,49 @@ const getOne = async (req, res) => {
 	}
 };
 
-
 /**
  * FUNCTION TO CREATE A POST
-*/
+ */
 const create = async (req, res) => {
-	//const result = await validationResult(req);
-	const {id_user} = await req.user;
-  const {title, content,categories} = req.body;
-  console.log(req.file);
-  console.log(req.body);
-  
+	const { id_user } = await req.user;
+	const { title, content, categories } = req.body;
+	let uploadResult = {};
+
 	try {
-	//verifier si le titre et contenue ne sont pas null
-	if(!title && !content && !categories){
-		return res.status(400).json({
-			message:"title and content and categories are required"
-		})
-    }
+		// Check if title, content and categories are filled
+		if (!title || !content || !categories) {
+			return res.status(400).json({
+				message: "title and content and categories are required",
+			});
+		}
 
 		// Check if post image has been uploaded
-		if(req.file) {
-			const result = await uploadToCloudinary(req.file.path);
-			const [postResult]= await db.execute(ADD_POST_WITH_IMAGE, [title, result.secure_url, content, id_user]);
-
-			// Ajouter les catégories associées dans la table `post_categories`
-			const postId = postResult.insertId; // Récupérer l'id du post nouvellement créé
-			const values = categories.map((id_category) => [postId, parseInt(id_category)]);
-			
-      // Insertion des relations dans `post_categories`
-			
-      await db.query(
-				`INSERT INTO post_category(id_post, id_category) VALUES ?`,
-        [values]
-      );
-      return res.status(201).json({
-				message: "Post created",
-      });
+		if (req.file) {
+			uploadResult = await uploadToCloudinary(req.file.path);
 		}
-    
+
+		const [postResult] = await db.execute(ADD_POST, [
+			title,
+			req.file ? uploadResult.secure_url : null,
+			content,
+			id_user,
+		]);
+
+		// Ajouter les catégories associées dans la table `post_categories`
+		const postId = postResult.insertId;
+
+		// Check if submitted categories is a list
+		const isListOfCategories = typeof categories !== "string";
+		let values = [];
+		if (isListOfCategories) {
+			values = await categories.map((id_category) => [postId, parseInt(id_category)]);
+		}
+
+		// Insert the post id and categories id in post_category table
+		await db.query(ADD_TO_POST_CATEGORY, [isListOfCategories ? values : [[postId, parseInt(categories)]]]);
+		return res.status(201).json({
+			message: "Post created",
+		});
 	} catch (error) {
 		return res.status(500).json({
 			message: error.message,
@@ -108,7 +113,7 @@ const update = async (req, res) => {
 	const result = await validationResult(req);
 	const id_post = await req.params.id;
 	const isPostExist = await postExist(id_post);
-  const {title, image, content} = req.body
+	const { title, image, content } = req.body;
 
 	// Check validation
 	if (!result.isEmpty()) {
@@ -124,20 +129,18 @@ const update = async (req, res) => {
 		});
 	}
 
-		try {
-			await db.execute(UPDATE_POST_BY_ID, [title, image, content, id_post]);
-	 
+	try {
+		await db.execute(UPDATE_POST_BY_ID, [title, image, content, id_post]);
 
-			return res.json({
-				message: "Post updated",
-				//data: isPostExist.data,
-			});
-		} catch (error) {
-			return res.status(500).json({
-				message: error.message,
-			});
-		}
-	
+		return res.json({
+			message: "Post updated",
+			//data: isPostExist.data,
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
+		});
+	}
 };
 
 /**
@@ -166,4 +169,4 @@ const remove = async (req, res) => {
 	}
 };
 
-export { create, getAll, getOne, remove, update};
+export { create, getAll, getOne, remove, update };
