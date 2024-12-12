@@ -59,6 +59,7 @@ const getOne = async (req, res) => {
 */
 const create = async (req, res) => {
 	const result = await validationResult(req);
+	const {id_user} = await req.user
   const {title, image, content,categories} = req.body
 
 	// Check validation
@@ -72,7 +73,7 @@ const create = async (req, res) => {
 		
     // Ajouter les catégories associées dans la table `post_categories`
     if (categories && categories.length > 0) {
-      const [postResult]= await db.execute(ADD_POST, [title, image, content, 2]);
+      const [postResult]= await db.execute(ADD_POST, [title, image, content, id_user]);
     const postId = postResult.insertId; // Récupérer l'id du post nouvellement créé
 
     const values = categories.map((id_category) => [postId, id_category]);
