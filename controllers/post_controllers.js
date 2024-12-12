@@ -5,7 +5,7 @@ import { pagination } from "../helpers.js";
 import { postExist } from "../services/post_service.js";
 import { uploadToCloudinary } from "../services/upload_service.js";
 
-const {GET_ALL_POSTS, GET_POST_BY_ID, ADD_POST, UPDATE_POST_BY_ID, DELETE_POST_BY_ID} = postQueries();
+const {GET_ALL_POSTS, GET_POST_BY_ID, ADD_POST_WITH_IMAGE, UPDATE_POST_BY_ID, DELETE_POST_BY_ID} = postQueries();
 
 /**
  * FUNCTION TO GET ALL POSTS
@@ -65,9 +65,7 @@ const create = async (req, res) => {
   const {title, content,categories} = req.body;
   console.log(req.file);
   console.log(req.body);
-  console.log(req.body.title);
   
- console.log(title,  content,categories)
 	try {
 	//verifier si le titre et contenue ne sont pas null
 	if(!title && !content && !categories){
@@ -76,22 +74,25 @@ const create = async (req, res) => {
 		})
     }
 
-    // Ajouter les catégories associées dans la table `post_categories`
-		const result = await uploadToCloudinary(req.file.path);
-      const [postResult]= await db.execute(ADD_POST, [title, result.secure_url, content, id_user]);
-    const postId = postResult.insertId; // Récupérer l'id du post nouvellement créé
+		// Check if post image has been uploaded
+		if(req.file) {
+			const result = await uploadToCloudinary(req.file.path);
+			const [postResult]= await db.execute(ADD_POST_WITH_IMAGE, [title, result.secure_url, content, id_user]);
 
-    const values = categories.map((id_category) => [postId, parseInt(id_category)]);
-
+			// Ajouter les catégories associées dans la table `post_categories`
+			const postId = postResult.insertId; // Récupérer l'id du post nouvellement créé
+			const values = categories.map((id_category) => [postId, parseInt(id_category)]);
+			
       // Insertion des relations dans `post_categories`
-  
+			
       await db.query(
-        `INSERT INTO post_category(id_post, id_category) VALUES ?`,
+				`INSERT INTO post_category(id_post, id_category) VALUES ?`,
         [values]
       );
       return res.status(201).json({
-        message: "Post created",
+				message: "Post created",
       });
+		}
     
 	} catch (error) {
 		return res.status(500).json({
