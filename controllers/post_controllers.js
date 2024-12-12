@@ -3,6 +3,7 @@ import { db } from "../config/database.js";
 import { postQueries } from "../database/queries/post_queries.js";
 import { pagination } from "../helpers.js";
 import { postExist } from "../services/post_service.js";
+import { uploadToCloudinary } from "../services/upload_service.js";
 
 const {GET_ALL_POSTS, GET_POST_BY_ID, ADD_POST, UPDATE_POST_BY_ID, DELETE_POST_BY_ID} = postQueries();
 
@@ -54,29 +55,33 @@ const getOne = async (req, res) => {
 	}
 };
 
+
 /**
  * FUNCTION TO CREATE A POST
 */
 const create = async (req, res) => {
-	const result = await validationResult(req);
-	const {id_user} = await req.user
-  const {title, image, content,categories} = req.body
-
-	// Check validation
-	if (!result.isEmpty()) {
-		return res.status(400).json({
-			message: result.errors,
-		});
-	}
- console.log(title, image, content,categories)
+	//const result = await validationResult(req);
+	const {id_user} = await req.user;
+  const {title, content,categories} = req.body;
+  console.log(req.file);
+  console.log(req.body);
+  console.log(req.body.title);
+  
+ console.log(title,  content,categories)
 	try {
-		
+	//verifier si le titre et contenue ne sont pas null
+	if(!title && !content && !categories){
+		return res.status(400).json({
+			message:"title and content and categories are required"
+		})
+    }
+
     // Ajouter les catégories associées dans la table `post_categories`
-    if (categories && categories.length > 0) {
-      const [postResult]= await db.execute(ADD_POST, [title, image, content, id_user]);
+		const result = await uploadToCloudinary(req.file.path);
+      const [postResult]= await db.execute(ADD_POST, [title, result.secure_url, content, id_user]);
     const postId = postResult.insertId; // Récupérer l'id du post nouvellement créé
 
-    const values = categories.map((id_category) => [postId, id_category]);
+    const values = categories.map((id_category) => [postId, parseInt(id_category)]);
 
       // Insertion des relations dans `post_categories`
   
@@ -87,12 +92,7 @@ const create = async (req, res) => {
       return res.status(201).json({
         message: "Post created",
       });
-    }else{
-      return res.status(400)
-
-    }
-
-		
+    
 	} catch (error) {
 		return res.status(500).json({
 			message: error.message,
