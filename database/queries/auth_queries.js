@@ -15,9 +15,9 @@ export const authQueries = () => {
 
 	const CREATE_USER = `INSERT INTO users(username, surname, firstname, email, password, id_role) VALUES (?, ?, ?, ?, ?, ?)`;
 
-	const UPDATE_USER_PROFILE = `UPDATE users SET surname = ?, firstname = ?, address = ?, date_of_birth = ?, description = ?`;
+	const UPDATE_USER_PROFILE = `UPDATE users SET surname = ?, firstname = ?, address = ?, date_of_birth = ?, description = ? WHERE id_user = ?`;
 
-	const UPDATE_USER_AVATAR = `UPDATE users SET avatar = ?`;
+	const UPDATE_USER_AVATAR = `UPDATE users SET avatar = ? WHERE id_user = ?`;
 
 	const UPDATE_USER_HASH = `UPDATE users SET hash = ? WHERE email = ?`;
 

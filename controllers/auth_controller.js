@@ -5,6 +5,7 @@ import { transport } from "../config/email.js";
 import { authQueries } from "../database/queries/auth_queries.js";
 import { hashHelper, pagination, randomStringGenerator } from "../helpers.js";
 import { findUser, userRole } from "../services/auth_service.js";
+import { uploadToCloudinary } from "../services/upload_service.js";
 
 const {
 	GET_ROLE_BY_ID,
@@ -325,7 +326,7 @@ const update = async (req, res) => {
 	}
 
 	try {
-		await db.execute(UPDATE_USER_PROFILE, [surname, firstname, address, date_of_birth, description]);
+		await db.execute(UPDATE_USER_PROFILE, [surname, firstname, address, date_of_birth, description, id_user]);
 		return res.json({
 			message: "Profile updated",
 		});
@@ -339,7 +340,29 @@ const update = async (req, res) => {
 /**
  * FUNCTION TO UPDATE USER'S AVATAR
  */
-const updateAvatar = async (req, res) => {};
+const updateAvatar = async (req, res) => {
+	const { id_user } = await req.user;
+
+	try {
+		if (!req.file) {
+			return res.status(400).json({ error: "Please fill user's avatar" });
+		}
+
+		console.log("Uploaded file", req.file);
+		const result = await uploadToCloudinary(req.file.path);
+
+		console.log(result);
+		await db.execute(UPDATE_USER_AVATAR, [result.secure_url, id_user]);
+
+		return res.json({
+			message: "Avatar updated",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error,
+		});
+	}
+};
 
 /**
  * FUNCTION TO UPDATE A USER ROLE BY ID

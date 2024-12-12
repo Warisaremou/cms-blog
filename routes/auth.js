@@ -20,6 +20,7 @@ import {
 	updateProfileValidator,
 	updateRoleValidator,
 } from "../validators/auth_validator.js";
+import { upload } from "../config/file.js";
 
 const router = express.Router();
 
@@ -42,7 +43,7 @@ router.get("/users", authMiddleware, isAdminMiddleware, getUsers);
 // ----------- UPDATE PROFILE ----------- //
 router.patch("/", authMiddleware, updateProfileValidator, update);
 // ----------- UPDATE AVATAR ----------- //
-router.patch("/", authMiddleware, updateAvatar);
+router.patch("/avatar", authMiddleware, upload, updateAvatar);
 // ----------- UPDATE A USER ROLE BY ID ----------- //
 router.patch("/user-role/:id", authMiddleware, isAdminMiddleware, updateRoleValidator, updateRole);
 // ----------- DELETE ACCOUNT ----------- //
