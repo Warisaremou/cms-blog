@@ -110,17 +110,10 @@ const create = async (req, res) => {
  * FUNCTION TO UPDATE A POST BY ID
  */
 const update = async (req, res) => {
-	const result = await validationResult(req);
 	const id_post = await req.params.id;
 	const isPostExist = await postExist(id_post);
-	const { title, image, content } = req.body;
-
-	// Check validation
-	if (!result.isEmpty()) {
-		return res.status(400).json({
-			message: result.errors,
-		});
-	}
+	const { title, content, categories } = req.body;
+	let uploadResult = {};
 
 	// Check if the post already exist
 	if (!isPostExist.exist) {
@@ -130,11 +123,30 @@ const update = async (req, res) => {
 	}
 
 	try {
-		await db.execute(UPDATE_POST_BY_ID, [title, image, content, id_post]);
+		// Check if title, content and categories are filled
+		if (!title || !content || !categories) {
+			return res.status(400).json({
+				message: "title and content and categories are required",
+			});
+		}
 
+		// Check if post image has been uploaded
+		if (req.file) {
+			uploadResult = await uploadToCloudinary(req.file.path);
+		}
+
+		// ? If new image has been uploaded, change image else if post have an image just past the same url else just past null
+		const postHasImage = postExist.data.image !== null;
+		await db.execute(UPDATE_POST_BY_ID, [
+			title,
+			req.file ? uploadResult.secure_url : postHasImage ? postExist.data.image : null,
+			content,
+			id_post,
+		]);
+
+		// TODO: Fix case when user change categories
 		return res.json({
 			message: "Post updated",
-			//data: isPostExist.data,
 		});
 	} catch (error) {
 		return res.status(500).json({
