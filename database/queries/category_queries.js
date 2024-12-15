@@ -1,5 +1,5 @@
 export const categoryQueries = () => {
-	const GET_ALL_CATEGORIES = `SELECT * FROM categories LIMIT ? OFFSET ?`;
+	const GET_ALL_CATEGORIES = `SELECT * FROM categories ORDER BY created_at DESC LIMIT ? OFFSET ?`;
 
 	const GET_CATEGORY_BY_ID = `SELECT * FROM categories WHERE id_category = ?`;
 

@@ -1,7 +1,9 @@
 export const postQueries = () => {
-	const GET_ALL_POSTS = `SELECT * FROM posts LIMIT ? OFFSET ?`;
+	const GET_ALL_POSTS = `SELECT * FROM posts ORDER BY created_at ASC LIMIT ? OFFSET ?`;
 
 	const GET_POST_BY_ID = `SELECT * FROM posts WHERE id_post = ?`;
+
+	const GET_POST_CATEGORIES_BY_ID = `SELECT id_category FROM post_category WHERE id_post = ?`;
 
 	const ADD_POST = `INSERT INTO posts(title, image, content, id_user) VALUES (?, ?, ?, ?)`;
 
@@ -14,6 +16,7 @@ export const postQueries = () => {
 	return {
 		GET_ALL_POSTS,
 		GET_POST_BY_ID,
+		GET_POST_CATEGORIES_BY_ID,
 		ADD_POST,
 		ADD_TO_POST_CATEGORY,
 		UPDATE_POST_BY_ID,

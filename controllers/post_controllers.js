@@ -1,12 +1,23 @@
-import { validationResult } from "express-validator";
 import { db } from "../config/database.js";
 import { postQueries } from "../database/queries/post_queries.js";
 import { pagination } from "../helpers.js";
 import { postExist } from "../services/post_service.js";
 import { uploadToCloudinary } from "../services/upload_service.js";
+import { categoryQueries } from "../database/queries/category_queries.js";
+import { authQueries } from "../database/queries/auth_queries.js";
 
-const { GET_ALL_POSTS, GET_POST_BY_ID, ADD_POST, ADD_TO_POST_CATEGORY, UPDATE_POST_BY_ID, DELETE_POST_BY_ID } =
-	postQueries();
+const {
+	GET_ALL_POSTS,
+	GET_POST_BY_ID,
+	GET_POST_CATEGORIES_BY_ID,
+	ADD_POST,
+	ADD_TO_POST_CATEGORY,
+	UPDATE_POST_BY_ID,
+	DELETE_POST_BY_ID,
+} = postQueries();
+
+const { GET_CATEGORY_BY_ID } = categoryQueries();
+const { FIND_USER_WITH_ID } = authQueries();
 
 /**
  * FUNCTION TO GET ALL POSTS
@@ -17,8 +28,34 @@ const getAll = async (req, res) => {
 
 		const [data] = await db.execute(GET_ALL_POSTS, [per_page, page]);
 
+		const newData = await Promise.all(
+			data.map(async (post) => {
+				const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID, [post.id_post]);
+				const [user] = await db.execute(FIND_USER_WITH_ID, [post.id_user]);
+				const { password, hash, ...rest } = user[0] ?? {};
+				post.user = rest ?? {};
+
+				// If categories exist, fetch their details
+				if (categories.length > 0) {
+					const categoryData = await Promise.all(
+						categories.map(async (category) => {
+							const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID, [category.id_category]);
+							return categoryInfo;
+						})
+					);
+					// Assign categories to the post
+					post.categories = categoryData.flat();
+				} else {
+					// Set categories to empty array
+					post.categories = [];
+				}
+
+				return post; // Return the enriched post
+			})
+		);
+
 		return res.json({
-			data: data,
+			data: newData,
 			meta: {
 				page: currentPage,
 				per_page,
@@ -111,6 +148,7 @@ const create = async (req, res) => {
  */
 const update = async (req, res) => {
 	const id_post = await req.params.id;
+	console.log(id_post);
 	const isPostExist = await postExist(id_post);
 	const { title, content, categories } = req.body;
 	let uploadResult = {};
@@ -136,10 +174,10 @@ const update = async (req, res) => {
 		}
 
 		// ? If new image has been uploaded, change image else if post have an image just past the same url else just past null
-		const postHasImage = postExist.data.image !== null;
+		const postHasImage = (await isPostExist.data.image) !== null;
 		await db.execute(UPDATE_POST_BY_ID, [
 			title,
-			req.file ? uploadResult.secure_url : postHasImage ? postExist.data.image : null,
+			req.file ? uploadResult.secure_url : postHasImage ? isPostExist.data.image : null,
 			content,
 			id_post,
 		]);
