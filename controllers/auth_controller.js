@@ -257,9 +257,7 @@ const getMe = async (req, res) => {
 	// Destructuring data to remove to remove password from property
 	const { password, ...trimedData } = isAccountExist.data;
 
-	return res.json({
-		data: trimedData,
-	});
+	return res.json(trimedData);
 };
 
 /**
