@@ -50,7 +50,7 @@ const getAll = async (req, res) => {
 					post.categories = [];
 				}
 
-				return post; // Return the enriched post
+				return post;
 			})
 		);
 
@@ -81,11 +81,31 @@ const getOne = async (req, res) => {
 			return res.status(404).json({
 				message: "Post not found",
 			});
-		} else {
-			return res.json({
-				data: data[0],
-			});
 		}
+
+		const post = data[0];
+
+		const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID, [post.id_post]);
+		const [user] = await db.execute(FIND_USER_WITH_ID, [post.id_user]);
+		const { password, hash, ...rest } = user[0] ?? {};
+		post.user = rest ?? {};
+
+		// If categories exist, fetch their details
+		if (categories.length > 0) {
+			const categoryData = await Promise.all(
+				categories.map(async (category) => {
+					const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID, [category.id_category]);
+					return categoryInfo;
+				})
+			);
+			// Assign categories to the post
+			post.categories = categoryData.flat();
+		} else {
+			// Set categories to empty array
+			post.categories = [];
+		}
+
+		return res.json(post);
 	} catch (error) {
 		return res.status(500).json({
 			error: error.message,
