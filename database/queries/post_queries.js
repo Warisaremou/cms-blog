@@ -1,6 +1,8 @@
 export const postQueries = () => {
 	const GET_ALL_POSTS = `SELECT * FROM posts ORDER BY created_at ASC LIMIT ? OFFSET ?`;
 
+	const GET_ALL_POSTS_BY_USER_ID = `SELECT * FROM posts WHERE id_user = ? ORDER BY created_at ASC LIMIT ? OFFSET ?`;
+
 	const GET_POST_BY_ID = `SELECT * FROM posts WHERE id_post = ?`;
 
 	const GET_POST_CATEGORIES_BY_ID = `SELECT id_category FROM post_category WHERE id_post = ?`;
@@ -15,6 +17,7 @@ export const postQueries = () => {
 
 	return {
 		GET_ALL_POSTS,
+		GET_ALL_POSTS_BY_USER_ID,
 		GET_POST_BY_ID,
 		GET_POST_CATEGORIES_BY_ID,
 		ADD_POST,

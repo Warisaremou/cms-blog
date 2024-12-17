@@ -8,6 +8,7 @@ import { authQueries } from "../database/queries/auth_queries.js";
 
 const {
 	GET_ALL_POSTS,
+	GET_ALL_POSTS_BY_USER_ID,
 	GET_POST_BY_ID,
 	GET_POST_CATEGORIES_BY_ID,
 	ADD_POST,
@@ -109,6 +110,56 @@ const getOne = async (req, res) => {
 	} catch (error) {
 		return res.status(500).json({
 			error: error.message,
+		});
+	}
+};
+
+/**
+ * FUNCTION TO GET ALL POSTS BY USER ID
+ */
+const getAllByUser = async (req, res) => {
+	const { id_user } = await req.user;
+	try {
+		const { page, currentPage, per_page } = await pagination(req.query.page);
+
+		const [data] = await db.execute(GET_ALL_POSTS_BY_USER_ID, [id_user, per_page, page]);
+
+		const newData = await Promise.all(
+			data.map(async (post) => {
+				const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID, [post.id_post]);
+				const [user] = await db.execute(FIND_USER_WITH_ID, [post.id_user]);
+				const { password, hash, ...rest } = user[0] ?? {};
+				post.user = rest ?? {};
+
+				// If categories exist, fetch their details
+				if (categories.length > 0) {
+					const categoryData = await Promise.all(
+						categories.map(async (category) => {
+							const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID, [category.id_category]);
+							return categoryInfo;
+						})
+					);
+					// Assign categories to the post
+					post.categories = categoryData.flat();
+				} else {
+					// Set categories to empty array
+					post.categories = [];
+				}
+
+				return post;
+			})
+		);
+
+		return res.json({
+			data: newData,
+			meta: {
+				page: currentPage,
+				per_page,
+			},
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
 		});
 	}
 };
@@ -239,4 +290,4 @@ const remove = async (req, res) => {
 	}
 };
 
-export { create, getAll, getOne, remove, update };
+export { create, getAll, getOne, getAllByUser, remove, update };
