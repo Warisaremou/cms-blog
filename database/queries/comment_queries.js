@@ -1,5 +1,5 @@
 export const commentQueries = () => {
-	const GET_ALL_COMMENTS = `SELECT * FROM comments LIMIT ? OFFSET ?`;
+	const GET_ALL_COMMENTS = `SELECT * FROM comments WHERE id_post = ? LIMIT ? OFFSET ?`;
 
 	const GET_COMMENT_BY_ID = `SELECT * FROM comments WHERE id_comment= ?`;
 
