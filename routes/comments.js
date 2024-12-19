@@ -10,8 +10,8 @@ const router = express.Router();
  * COMMENTS ROUTES
  */
 
-// ----------- GET ALL COMMENTS ----------- //
-router.get("/", getAll);
+// ----------- GET ALL COMMENTS BY POST ID ----------- //
+router.get("/posts/:id_post", getAll);
 // ----------- GET A COMMENT BY ID ----------- //
 router.get("/:id", getOne);
 // ----------- ADD A COMMENT ----------- //
