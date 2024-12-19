@@ -4,18 +4,19 @@ import { commentQueries } from "../database/queries/comment_queries.js";
 import { pagination } from "../helpers.js";
 import { commentExist } from "../services/comment_service.js";
 import { postQueries } from "../database/queries/post_queries.js";
+import { authQueries } from "../database/queries/auth_queries.js";
 
 const { GET_ALL_COMMENTS, GET_COMMENT_BY_ID, ADD_COMMENT, UPDATE_COMMENT_BY_ID, DELETE_COMMENT_BY_ID } =
 	commentQueries();
-const {
-	GET_POST_BY_ID,
-} = postQueries();
+const { GET_POST_BY_ID } = postQueries();
+const { FIND_USER_WITH_ID } = authQueries();
 
 /**
  * FUNCTION TO GET ALL COMMENTS
  */
 const getAll = async (req, res) => {
-	const id_post = await req.params.id_post
+	const id_post = await req.params.id_post;
+	console.log(id_post);
 	try {
 		const [post_data] = await db.execute(GET_POST_BY_ID, [id_post]);
 		if (post_data.length === 0) {
@@ -28,8 +29,17 @@ const getAll = async (req, res) => {
 
 		const [data] = await db.execute(GET_ALL_COMMENTS, [id_post, per_page, page]);
 
+		const commentList = await Promise.all(
+			data.map(async (comment) => {
+				const [user] = await db.execute(FIND_USER_WITH_ID, [comment.id_user]);
+				const { password, hash, ...rest } = (await user[0]) ?? {};
+				comment.user = (await rest) ?? {};
+				return comment;
+			})
+		);
+
 		return res.json({
-			data: data,
+			data: commentList,
 			meta: {
 				page: currentPage,
 				per_page,
