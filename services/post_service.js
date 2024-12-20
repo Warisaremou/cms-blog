@@ -13,7 +13,7 @@ const { GET_CATEGORY_BY_ID } = categoryQueries();
  * @returns boolean and data(if post exist)
  */
 const postExist = async (id_post) => {
-	const [data] = await db.execute(GET_POST_BY_ID, [id_post]);
+	const [data] = await db.execute(GET_POST_BY_ID(id_post));
 
 	if (data.length === 0) {
 		return {
@@ -33,8 +33,8 @@ const postExist = async (id_post) => {
  * @return {*} the enriched post
  */
 const getPostWithCategoriesAndUser = async (post) => {
-	const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID, [post.id_post]);
-	const [user] = await db.execute(FIND_USER_WITH_ID, [post.id_user]);
+	const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID(post.id_post));
+	const [user] = await db.execute(FIND_USER_WITH_ID(post.id_user));
 	const { password, hash, ...rest } = user[0] ?? {};
 	post.user = rest ?? {};
 
@@ -42,7 +42,7 @@ const getPostWithCategoriesAndUser = async (post) => {
 	if (categories.length > 0) {
 		const categoryData = await Promise.all(
 			categories.map(async (category) => {
-				const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID, [category.id_category]);
+				const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID(category.id_category));
 				return categoryInfo;
 			})
 		);

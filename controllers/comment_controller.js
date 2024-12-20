@@ -17,7 +17,7 @@ const {
 const getAll = async (req, res) => {
 	const id_post = await req.params.id_post
 	try {
-		const [post_data] = await db.execute(GET_POST_BY_ID, [id_post]);
+		const [post_data] = await db.execute(GET_POST_BY_ID(id_post));
 		if (post_data.length === 0) {
 			return res.status(404).json({
 				message: "Post not found",
@@ -26,7 +26,7 @@ const getAll = async (req, res) => {
 
 		const { page, currentPage, per_page } = await pagination(req.query.page);
 
-		const [data] = await db.execute(GET_ALL_COMMENTS, [id_post, per_page, page]);
+		const [data] = await db.execute(GET_ALL_COMMENTS(id_post, per_page, page));
 
 		return res.json({
 			data: data,
@@ -49,7 +49,7 @@ const getOne = async (req, res) => {
 	const id_comment = await req.params.id;
 
 	try {
-		const [data] = await db.execute(GET_COMMENT_BY_ID, [id_comment]);
+		const [data] = await db.execute(GET_COMMENT_BY_ID(id_comment));
 
 		if (data.length === 0) {
 			return res.status(404).json({
@@ -83,7 +83,7 @@ const create = async (req, res) => {
 	}
 
 	try {
-		await db.execute(ADD_COMMENT, [content, userData.id_user, id_post]);
+		await db.execute(ADD_COMMENT(content, userData.id_user, id_post));
 
 		return res.status(201).json({
 			message: "Comment created",
@@ -113,7 +113,7 @@ const update = async (req, res) => {
 	// Check if the comment already exist
 	if (isCommentExist.exist) {
 		try {
-			await db.execute(UPDATE_COMMENT_BY_ID, [req.body.content, id_comment]);
+			await db.execute(UPDATE_COMMENT_BY_ID(req.body.content, id_comment));
 
 			return res.json({
 				message: "Comment updated",
@@ -139,7 +139,7 @@ const remove = async (req, res) => {
 
 	if (isCommentExist.exist) {
 		try {
-			await db.execute(DELETE_COMMENT_BY_ID, [id_comment]);
+			await db.execute(DELETE_COMMENT_BY_ID(id_comment));
 
 			return res.json({
 				message: "Comment deleted",

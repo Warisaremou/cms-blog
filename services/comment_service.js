@@ -7,8 +7,8 @@ import { commentQueries } from "../database/queries/comment_queries.js";
  * @returns boolean and data(if comment exist)
  */
 const commentExist = async (id_comment) => {
-	const { GET_COMMENT_BY_ID } = await commentQueries();
-	const [data] = await db.execute(GET_COMMENT_BY_ID, [id_comment]);
+	const { GET_COMMENT_BY_ID } = commentQueries();
+	const [data] = await db.execute(GET_COMMENT_BY_ID(id_comment));
 
 	if (data.length === 0) {
 		return {

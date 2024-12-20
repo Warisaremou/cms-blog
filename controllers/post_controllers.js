@@ -27,12 +27,12 @@ const getAll = async (req, res) => {
 	try {
 		const { page, currentPage, per_page } = await pagination(req.query.page);
 
-		const [data] = await db.execute(GET_ALL_POSTS, [per_page, page]);
+		const [data] = await db.execute(GET_ALL_POSTS(per_page, page));
 
 		const newData = await Promise.all(
 			data.map(async (post) => {
-				const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID, [post.id_post]);
-				const [user] = await db.execute(FIND_USER_WITH_ID, [post.id_user]);
+				const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID(post.id_post));
+				const [user] = await db.execute(FIND_USER_WITH_ID(post.id_user));
 				const { password, hash, ...rest } = user[0] ?? {};
 				post.user = rest ?? {};
 
@@ -40,7 +40,7 @@ const getAll = async (req, res) => {
 				if (categories.length > 0) {
 					const categoryData = await Promise.all(
 						categories.map(async (category) => {
-							const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID, [category.id_category]);
+							const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID(category.id_category));
 							return categoryInfo;
 						})
 					);
@@ -76,7 +76,7 @@ const getOne = async (req, res) => {
 	const id_post = await req.params.id;
 
 	try {
-		const [data] = await db.execute(GET_POST_BY_ID, [id_post]);
+		const [data] = await db.execute(GET_POST_BY_ID(id_post));
 
 		if (data.length === 0) {
 			return res.status(404).json({
@@ -86,8 +86,8 @@ const getOne = async (req, res) => {
 
 		const post = data[0];
 
-		const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID, [post.id_post]);
-		const [user] = await db.execute(FIND_USER_WITH_ID, [post.id_user]);
+		const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID(post.id_post));
+		const [user] = await db.execute(FIND_USER_WITH_ID(post.id_user));
 		const { password, hash, ...rest } = user[0] ?? {};
 		post.user = rest ?? {};
 
@@ -95,7 +95,7 @@ const getOne = async (req, res) => {
 		if (categories.length > 0) {
 			const categoryData = await Promise.all(
 				categories.map(async (category) => {
-					const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID, [category.id_category]);
+					const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID(category.id_category));
 					return categoryInfo;
 				})
 			);
@@ -122,12 +122,12 @@ const getAllByUser = async (req, res) => {
 	try {
 		const { page, currentPage, per_page } = await pagination(req.query.page);
 
-		const [data] = await db.execute(GET_ALL_POSTS_BY_USER_ID, [id_user, per_page, page]);
+		const [data] = await db.execute(GET_ALL_POSTS_BY_USER_ID(id_user, per_page, page));
 
 		const newData = await Promise.all(
 			data.map(async (post) => {
-				const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID, [post.id_post]);
-				const [user] = await db.execute(FIND_USER_WITH_ID, [post.id_user]);
+				const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID(post.id_post));
+				const [user] = await db.execute(FIND_USER_WITH_ID(post.id_user));
 				const { password, hash, ...rest } = user[0] ?? {};
 				post.user = rest ?? {};
 
@@ -135,7 +135,7 @@ const getAllByUser = async (req, res) => {
 				if (categories.length > 0) {
 					const categoryData = await Promise.all(
 						categories.map(async (category) => {
-							const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID, [category.id_category]);
+							const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID(category.id_category));
 							return categoryInfo;
 						})
 					);
@@ -185,25 +185,21 @@ const create = async (req, res) => {
 			uploadResult = await uploadToCloudinary(req.file.path);
 		}
 
-		const [postResult] = await db.execute(ADD_POST, [
+		const [postResult] = await db.execute(ADD_POST(
 			title,
 			req.file ? uploadResult.secure_url : null,
 			content,
 			id_user,
-		]);
+		));
 
 		// Ajouter les catégories associées dans la table `post_categories`
 		const postId = postResult.insertId;
 
-		// Check if submitted categories is a list
-		const isListOfCategories = typeof categories !== "string";
-		let values = [];
-		if (isListOfCategories) {
-			values = await categories.map((id_category) => [postId, parseInt(id_category)]);
+		for (const id_category of categories) {
+			// Utiliser la fonction dynamique pour chaque catégorie
+			await db.query(ADD_TO_POST_CATEGORY(postId, id_category));
 		}
-
-		// Insert the post id and categories id in post_category table
-		await db.query(ADD_TO_POST_CATEGORY, [isListOfCategories ? values : [[postId, parseInt(categories)]]]);
+		
 		return res.status(201).json({
 			message: "Post created",
 		});
@@ -246,12 +242,12 @@ const update = async (req, res) => {
 
 		// ? If new image has been uploaded, change image else if post have an image just past the same url else just past null
 		const postHasImage = (await isPostExist.data.image) !== null;
-		await db.execute(UPDATE_POST_BY_ID, [
+		await db.execute(UPDATE_POST_BY_ID(
 			title,
 			req.file ? uploadResult.secure_url : postHasImage ? isPostExist.data.image : null,
 			content,
 			id_post,
-		]);
+		));
 
 		// TODO: Fix case when user change categories
 		return res.json({
@@ -273,7 +269,7 @@ const remove = async (req, res) => {
 
 	if (isPostExist.exist) {
 		try {
-			await db.execute(DELETE_POST_BY_ID, [id_post]);
+			await db.execute(DELETE_POST_BY_ID(id_post));
 
 			return res.json({
 				message: "Post deleted",

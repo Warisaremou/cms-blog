@@ -20,7 +20,7 @@ const isModeratorOrPostOwner = async (req, res, next) => {
     }
 
     // Retrieve the role of the logged in user
-    const [role] = await db.execute(GET_ROLE_BY_ID, [userData.id_role]);
+    const [role] = await db.execute(GET_ROLE_BY_ID(userData.id_role));
     const isPostOwner = isPostExist.data.id_user === userData.id_user; // Vérifier si l'utilisateur est le propriétaire du post
 
     // Check permissions
