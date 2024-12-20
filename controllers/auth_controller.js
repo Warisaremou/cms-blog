@@ -64,7 +64,7 @@ const register = async (req, res) => {
 			});
 		}
 
-		await db.execute(CREATE_USER, [username, surname, firstname, email, hashedPassword, isRoleExist.id_role]);
+		await db.execute(CREATE_USER(email, hashedPassword, username, firstname, surname, isRoleExist.id_role));
 
 		return res.status(201).json({
 			message: "Account created",
@@ -170,7 +170,7 @@ const forgotPassword = async (req, res) => {
 		// Generate hash in url query param
 		const generatedHash = await randomStringGenerator();
 		// Insert generatedHash in the user's data
-		await db.execute(UPDATE_USER_HASH, [generatedHash, email]);
+		await db.execute(UPDATE_USER_HASH(generatedHash, email));
 
 		// Send an email to the user
 		await transport
@@ -228,7 +228,7 @@ const resetPassword = async (req, res) => {
 		// Hash submitted password
 		const hashedPassword = await hash(password);
 
-		await db.execute(UPDATE_USER_PASSWORD_WITH_HASH, [hashedPassword, hashValue]);
+		await db.execute(UPDATE_USER_PASSWORD_WITH_HASH(hashedPassword, hashValue));
 
 		return res.status(201).json({
 			message: "Password reseted successfully",
@@ -267,7 +267,7 @@ const getUsers = async (req, res) => {
 	try {
 		const { page, currentPage } = await pagination(req.query.page);
 
-		const [data] = await db.execute(FIND_ALL_USERS, [10, page]);
+		const [data] = await db.execute(FIND_ALL_USERS(15, page));
 
 		// Get id of the role with the name admin from the db
 		const isRoleExist = await userRole("admin");
@@ -324,7 +324,7 @@ const update = async (req, res) => {
 	}
 
 	try {
-		await db.execute(UPDATE_USER_PROFILE, [surname, firstname, address, date_of_birth, description, id_user]);
+		await db.execute(UPDATE_USER_PROFILE(firstname, surname, address, date_of_birth, description, id_user));
 		return res.json({
 			message: "Profile updated",
 		});
@@ -347,7 +347,7 @@ const updateAvatar = async (req, res) => {
 		}
 
 		const result = await uploadToCloudinary(req.file.path);
-		await db.execute(UPDATE_USER_AVATAR, [result.secure_url, id_user]);
+		await db.execute(UPDATE_USER_AVATAR(result.secure_url, id_user));
 
 		return res.json({
 			message: "Avatar updated",
@@ -385,7 +385,7 @@ const updateRole = async (req, res) => {
 			});
 		}
 
-		await db.execute(UPDATE_USER_ROLE_BY_ID, [id_role, id_user]);
+		await db.execute(UPDATE_USER_ROLE_BY_ID(id_role, id_user));
 		return res.json({
 			message: "User's role update successfuly",
 		});
@@ -411,14 +411,14 @@ const remove = async (req, res) => {
 	}
 
 	// Add check to delete others account except admin account
-	const [role] = await db.execute(GET_ROLE_BY_ID, [id_role]);
+	const [role] = await db.execute(GET_ROLE_BY_ID(id_role));
 	if (role[0].name === "admin") {
 		return res.status(401).json({
 			message: "Cannot delete admin account",
 		});
 	}
 
-	await db.execute(DELETE_USER_ACCOUNT_BY_USER_ID, [id_user]);
+	await db.execute(DELETE_USER_ACCOUNT_BY_USER_ID(id_user));
 
 	return res.json({
 		message: "Account deleted successfuly",

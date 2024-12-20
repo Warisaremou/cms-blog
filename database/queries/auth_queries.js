@@ -1,31 +1,59 @@
 export const authQueries = () => {
-	const FIND_ALL_USERS = `SELECT * FROM users LIMIT ? OFFSET ?`;
+	const FIND_ALL_USERS = (per_page, page) => {
+		return `SELECT * FROM users LIMIT ${per_page} OFFSET ${page}`;
+	};
 
-	const FIND_USER_WITH_USERNAME = `SELECT * FROM users WHERE username = ?`;
+	const FIND_USER_WITH_USERNAME = (username) => {
+		return `SELECT * FROM users WHERE username="${username}"`;
+	};
 
-	const FIND_USER_WITH_EMAIL = `SELECT * FROM users WHERE email = ?`;
+	const FIND_USER_WITH_EMAIL = (email) => {
+		return `SELECT * FROM users WHERE email="${email}"`;
+	};
 
-	const FIND_USER_WITH_ID = `SELECT * FROM users WHERE id_user = ?`;
+	const FIND_USER_WITH_ID = (id_user) => {
+		return `SELECT * FROM users WHERE id_user=${id_user}`;
+	};
 
-	const FIND_USER_WITH_HASH = `SELECT id_user FROM users WHERE hash = ?`;
+	const FIND_USER_WITH_HASH = (hash) => {
+		return `SELECT id_user FROM users WHERE hash="${hash}"`;
+	};
 
-	const GET_ROLE = `SELECT id_role FROM roles WHERE name = ?`;
+	const GET_ROLE = (name) => {
+		return `SELECT id_role FROM roles WHERE name="${name}"`;
+	};
 
-	const GET_ROLE_BY_ID = `SELECT name FROM roles WHERE id_role = ?`;
+	const GET_ROLE_BY_ID = (id_role) => {
+		return `SELECT name FROM roles WHERE id_role=${id_role}`;
+	};
 
-	const CREATE_USER = `INSERT INTO users(username, surname, firstname, email, password, id_role) VALUES (?, ?, ?, ?, ?, ?)`;
+	const CREATE_USER = (email, password, username, firstname, surname, id_role) => {
+		return `INSERT INTO users(email, password, username, firstname, surname, id_role) VALUES ("${email}", "${password}", "${username}", "${firstname}", "${surname}", ${id_role})`;
+	};
 
-	const UPDATE_USER_PROFILE = `UPDATE users SET surname = ?, firstname = ?, address = ?, date_of_birth = ?, description = ? WHERE id_user = ?`;
+	const UPDATE_USER_PROFILE = (firstname, surname, address, date_of_birth, description, id_user) => {
+		return `UPDATE users SET firstname="${firstname}", surname="${surname}", address="${address}", date_of_birth="${date_of_birth}", description="${description}" WHERE id_user=${id_user}`;
+	};
 
-	const UPDATE_USER_AVATAR = `UPDATE users SET avatar = ? WHERE id_user = ?`;
+	const UPDATE_USER_AVATAR = (avatar, id_user) => {
+		return `UPDATE users SET avatar="${avatar}" WHERE id_user=${id_user}`;
+	};
 
-	const UPDATE_USER_HASH = `UPDATE users SET hash = ? WHERE email = ?`;
+	const UPDATE_USER_HASH = (hash, email) => {
+		return `UPDATE users SET hash="${hash}" WHERE email="${email}"`;
+	};
 
-	const UPDATE_USER_PASSWORD_WITH_HASH = `UPDATE users SET password = ?, hash=NULL WHERE hash = ?`;
+	const UPDATE_USER_PASSWORD_WITH_HASH = (password, hash) => {
+		return `UPDATE users SET password="${password}", hash=NULL WHERE hash="${hash}"`;
+	};
 
-	const UPDATE_USER_ROLE_BY_ID = `UPDATE users SET id_role = ? WHERE id_user = ?`;
+	const UPDATE_USER_ROLE_BY_ID = (id_role, id_user) => {
+		return `UPDATE users SET id_role=${id_role} WHERE id_user=${id_user}`;
+	};
 
-	const DELETE_USER_ACCOUNT_BY_USER_ID = `DELETE FROM users WHERE id_user = ?`;
+	const DELETE_USER_ACCOUNT_BY_USER_ID = (id_user) => {
+		return `DELETE FROM users WHERE id_user=${id_user}`;
+	};
 
 	return {
 		FIND_ALL_USERS,
