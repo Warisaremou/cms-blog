@@ -18,8 +18,8 @@ const isModeratorOrCommentOwner = async (req, res, next) => {
 			});
 		}
 
-		const [role] = await db.execute(GET_ROLE_BY_ID, [userData.id_role]);
-		const isCommentOwner = await isCommentExist.data.id_user == userData.id_user;
+		const [role] = await db.execute(GET_ROLE_BY_ID(serData.id_role));
+		const isCommentOwner = (await isCommentExist.data.id_user) == userData.id_user;
 
 		if (role[0].name !== "moderator" && !isCommentOwner) {
 			return res.status(403).json({

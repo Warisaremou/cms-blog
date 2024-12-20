@@ -37,7 +37,7 @@ const isAdminMiddleware = async (req, res, next) => {
 	const { GET_ROLE_BY_ID } = authQueries();
 	try {
 		const { id_role } = await req.user;
-		const [role] = await db.execute(GET_ROLE_BY_ID, [id_role]);
+		const [role] = await db.execute(GET_ROLE_BY_ID(id_role));
 
 		if (role[0].name !== "admin") {
 			return res.status(401).json({

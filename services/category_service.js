@@ -7,8 +7,8 @@ import { db } from "../config/database.js";
  * @returns boolean and data(if category exist)
  */
 const categoryExist = async (id_category) => {
-	const { GET_CATEGORY_BY_ID } = await categoryQueries();
-	const [data] = await db.execute(GET_CATEGORY_BY_ID, [id_category]);
+	const { GET_CATEGORY_BY_ID } = categoryQueries();
+	const [data] = await db.execute(GET_CATEGORY_BY_ID(id_category));
 
 	if (data.length === 0) {
 		return {
