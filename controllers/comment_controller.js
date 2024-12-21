@@ -3,13 +3,9 @@ import { db } from "../config/database.js";
 import { commentQueries } from "../database/queries/comment_queries.js";
 import { pagination } from "../helpers.js";
 import { commentExist } from "../services/comment_service.js";
-import { postQueries } from "../database/queries/post_queries.js";
-import { authQueries } from "../database/queries/auth_queries.js";
 
 const { GET_ALL_COMMENTS, GET_COMMENT_BY_ID, ADD_COMMENT, UPDATE_COMMENT_BY_ID, DELETE_COMMENT_BY_ID } =
 	commentQueries();
-const { GET_POST_BY_ID } = postQueries();
-const { FIND_USER_WITH_ID } = authQueries();
 
 /**
  * FUNCTION TO GET ALL COMMENTS
@@ -170,4 +166,4 @@ const remove = async (req, res) => {
 	}
 };
 
-export { getAll, getOne, create, update, remove };
+export { create, getAll, getOne, remove, update };
