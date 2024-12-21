@@ -1,10 +1,10 @@
 import { db } from "../config/database.js";
+import { authQueries } from "../database/queries/auth_queries.js";
+import { categoryQueries } from "../database/queries/category_queries.js";
 import { postQueries } from "../database/queries/post_queries.js";
 import { pagination } from "../helpers.js";
 import { postExist } from "../services/post_service.js";
 import { uploadToCloudinary } from "../services/upload_service.js";
-import { categoryQueries } from "../database/queries/category_queries.js";
-import { authQueries } from "../database/queries/auth_queries.js";
 
 const {
 	GET_ALL_POSTS,
@@ -29,34 +29,44 @@ const getAll = async (req, res) => {
 
 		const [data] = await db.execute(GET_ALL_POSTS(per_page, page));
 
-		const newData = await Promise.all(
-			data.map(async (post) => {
-				const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID(post.id_post));
-				const [user] = await db.execute(FIND_USER_WITH_ID(post.id_user));
-				const { password, hash, ...rest } = user[0] ?? {};
-				post.user = rest ?? {};
+		const postsList = await data.reduce((acc, currentPost) => {
+			let existingPost = acc.find((post) => post.id_post === currentPost.id_post);
 
-				// If categories exist, fetch their details
-				if (categories.length > 0) {
-					const categoryData = await Promise.all(
-						categories.map(async (category) => {
-							const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID(category.id_category));
-							return categoryInfo;
-						})
-					);
-					// Assign categories to the post
-					post.categories = categoryData.flat();
-				} else {
-					// Set categories to empty array
-					post.categories = [];
-				}
+			if (!existingPost) {
+				const { id_user, username, firstname, surname, avatar, id_role, id_category, name, ...rest } = currentPost;
 
-				return post;
-			})
-		);
+				existingPost = {
+					...rest,
+					user: {
+						id_user,
+						username,
+						firstname,
+						surname,
+						avatar,
+						id_role,
+					},
+					categories: [
+						{
+							id_category,
+							name,
+						},
+					],
+				};
+				acc.push(existingPost);
+
+				return acc;
+			} else {
+				existingPost.categories.push({
+					id_category: currentPost.id_category,
+					name: currentPost.name,
+				});
+
+				return acc;
+			}
+		}, []);
 
 		return res.json({
-			data: newData,
+			data: postsList,
 			meta: {
 				page: currentPage,
 				per_page,
@@ -83,30 +93,43 @@ const getOne = async (req, res) => {
 				message: "Post not found",
 			});
 		}
+		const postsList = await data.reduce((acc, currentPost) => {
+			let existingPost = acc.find((post) => post.id_post === currentPost.id_post);
 
-		const post = data[0];
+			if (!existingPost) {
+				const { id_user, username, firstname, surname, avatar, id_role, id_category, name, ...rest } = currentPost;
 
-		const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID(post.id_post));
-		const [user] = await db.execute(FIND_USER_WITH_ID(post.id_user));
-		const { password, hash, ...rest } = user[0] ?? {};
-		post.user = rest ?? {};
+				existingPost = {
+					...rest,
+					user: {
+						id_user,
+						username,
+						firstname,
+						surname,
+						avatar,
+						id_role,
+					},
+					categories: [
+						{
+							id_category,
+							name,
+						},
+					],
+				};
+				acc.push(existingPost);
 
-		// If categories exist, fetch their details
-		if (categories.length > 0) {
-			const categoryData = await Promise.all(
-				categories.map(async (category) => {
-					const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID(category.id_category));
-					return categoryInfo;
-				})
-			);
-			// Assign categories to the post
-			post.categories = categoryData.flat();
-		} else {
-			// Set categories to empty array
-			post.categories = [];
-		}
+				return acc;
+			} else {
+				existingPost.categories.push({
+					id_category: currentPost.id_category,
+					name: currentPost.name,
+				});
 
-		return res.json(post);
+				return acc;
+			}
+		}, []);
+
+		return res.json(postsList[0]);
 	} catch (error) {
 		return res.status(500).json({
 			error: error.message,
@@ -124,34 +147,44 @@ const getAllByUser = async (req, res) => {
 
 		const [data] = await db.execute(GET_ALL_POSTS_BY_USER_ID(id_user, per_page, page));
 
-		const newData = await Promise.all(
-			data.map(async (post) => {
-				const [categories] = await db.execute(GET_POST_CATEGORIES_BY_ID(post.id_post));
-				const [user] = await db.execute(FIND_USER_WITH_ID(post.id_user));
-				const { password, hash, ...rest } = user[0] ?? {};
-				post.user = rest ?? {};
+		const postsList = await data.reduce((acc, currentPost) => {
+			let existingPost = acc.find((post) => post.id_post === currentPost.id_post);
 
-				// If categories exist, fetch their details
-				if (categories.length > 0) {
-					const categoryData = await Promise.all(
-						categories.map(async (category) => {
-							const [categoryInfo] = await db.execute(GET_CATEGORY_BY_ID(category.id_category));
-							return categoryInfo;
-						})
-					);
-					// Assign categories to the post
-					post.categories = categoryData.flat();
-				} else {
-					// Set categories to empty array
-					post.categories = [];
-				}
+			if (!existingPost) {
+				const { id_user, username, firstname, surname, avatar, id_role, id_category, name, ...rest } = currentPost;
 
-				return post;
-			})
-		);
+				existingPost = {
+					...rest,
+					user: {
+						id_user,
+						username,
+						firstname,
+						surname,
+						avatar,
+						id_role,
+					},
+					categories: [
+						{
+							id_category,
+							name,
+						},
+					],
+				};
+				acc.push(existingPost);
+
+				return acc;
+			} else {
+				existingPost.categories.push({
+					id_category: currentPost.id_category,
+					name: currentPost.name,
+				});
+
+				return acc;
+			}
+		}, []);
 
 		return res.json({
-			data: newData,
+			data: postsList,
 			meta: {
 				page: currentPage,
 				per_page,
@@ -185,12 +218,7 @@ const create = async (req, res) => {
 			uploadResult = await uploadToCloudinary(req.file.path);
 		}
 
-		const [postResult] = await db.execute(ADD_POST(
-			title,
-			req.file ? uploadResult.secure_url : null,
-			content,
-			id_user,
-		));
+		const [postResult] = await db.execute(ADD_POST(title, req.file ? uploadResult.secure_url : null, content, id_user));
 
 		// Ajouter les catégories associées dans la table `post_categories`
 		const postId = postResult.insertId;
@@ -199,7 +227,7 @@ const create = async (req, res) => {
 			// Utiliser la fonction dynamique pour chaque catégorie
 			await db.query(ADD_TO_POST_CATEGORY(postId, id_category));
 		}
-		
+
 		return res.status(201).json({
 			message: "Post created",
 		});
@@ -242,12 +270,14 @@ const update = async (req, res) => {
 
 		// ? If new image has been uploaded, change image else if post have an image just past the same url else just past null
 		const postHasImage = (await isPostExist.data.image) !== null;
-		await db.execute(UPDATE_POST_BY_ID(
-			title,
-			req.file ? uploadResult.secure_url : postHasImage ? isPostExist.data.image : null,
-			content,
-			id_post,
-		));
+		await db.execute(
+			UPDATE_POST_BY_ID(
+				title,
+				req.file ? uploadResult.secure_url : postHasImage ? isPostExist.data.image : null,
+				content,
+				id_post
+			)
+		);
 
 		// TODO: Fix case when user change categories
 		return res.json({
@@ -286,4 +316,4 @@ const remove = async (req, res) => {
 	}
 };
 
-export { create, getAll, getOne, getAllByUser, remove, update };
+export { create, getAll, getAllByUser, getOne, remove, update };
