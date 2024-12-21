@@ -1,6 +1,4 @@
 import { db } from "../config/database.js";
-import { authQueries } from "../database/queries/auth_queries.js";
-import { categoryQueries } from "../database/queries/category_queries.js";
 import { postQueries } from "../database/queries/post_queries.js";
 import { pagination } from "../helpers.js";
 import { postExist } from "../services/post_service.js";
@@ -10,15 +8,11 @@ const {
 	GET_ALL_POSTS,
 	GET_ALL_POSTS_BY_USER_ID,
 	GET_POST_BY_ID,
-	GET_POST_CATEGORIES_BY_ID,
 	ADD_POST,
 	ADD_TO_POST_CATEGORY,
 	UPDATE_POST_BY_ID,
 	DELETE_POST_BY_ID,
 } = postQueries();
-
-const { GET_CATEGORY_BY_ID } = categoryQueries();
-const { FIND_USER_WITH_ID } = authQueries();
 
 /**
  * FUNCTION TO GET ALL POSTS

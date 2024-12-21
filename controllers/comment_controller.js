@@ -16,27 +16,31 @@ const { FIND_USER_WITH_ID } = authQueries();
  */
 const getAll = async (req, res) => {
 	const id_post = await req.params.id_post;
-	console.log(id_post);
-	try {
-		const [post_data] = await db.execute(GET_POST_BY_ID(id_post));
-		if (post_data.length === 0) {
-			return res.status(404).json({
-				message: "Post not found",
-			});
-		}
 
+	try {
 		const { page, currentPage, per_page } = await pagination(req.query.page);
 
 		const [data] = await db.execute(GET_ALL_COMMENTS(id_post, per_page, page));
 
-		const commentList = await Promise.all(
-			data.map(async (comment) => {
-				const [user] = await db.execute(FIND_USER_WITH_ID, [comment.id_user]);
-				const { password, hash, ...rest } = (await user[0]) ?? {};
-				comment.user = (await rest) ?? {};
-				return comment;
-			})
-		);
+		const commentList = await data.reduce((acc, currentComment) => {
+			const { id_user, username, firstname, surname, avatar, id_role, ...rest } = currentComment;
+
+			acc.push({
+				...rest,
+				user: {
+					id_user,
+					username,
+					firstname,
+					surname,
+					avatar,
+					id_role,
+				},
+			});
+
+			return acc;
+		}, []);
+
+		// console.log(commentList);
 
 		return res.json({
 			data: commentList,
