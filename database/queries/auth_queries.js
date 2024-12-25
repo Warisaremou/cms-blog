@@ -31,8 +31,8 @@ export const authQueries = () => {
 		return `INSERT INTO users(email, password, username, firstname, surname, id_role) VALUES ("${email}", "${password}", "${username}", "${firstname}", "${surname}", ${id_role})`;
 	};
 
-	const UPDATE_USER_PROFILE = (firstname, surname, address, date_of_birth, description, id_user) => {
-		return `UPDATE users SET firstname="${firstname}", surname="${surname}", address="${address}", date_of_birth="${date_of_birth}", description="${description}" WHERE id_user=${id_user}`;
+	const UPDATE_USER_PROFILE = (firstname, surname, address, description, id_user) => {
+		return `UPDATE users SET firstname="${firstname}", surname="${surname}", address="${address}", description="${description}" WHERE id_user=${id_user}`;
 	};
 
 	const UPDATE_USER_AVATAR = (avatar, id_user) => {

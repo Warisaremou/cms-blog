@@ -306,7 +306,7 @@ const getUsers = async (req, res) => {
 const update = async (req, res) => {
 	const result = validationResult(req);
 	const { id_user } = await req.user;
-	const { surname, firstname, address, date_of_birth, description } = await req.body;
+	const { surname, firstname, address, description } = await req.body;
 
 	// Check validation
 	if (!result.isEmpty()) {
@@ -324,7 +324,7 @@ const update = async (req, res) => {
 	}
 
 	try {
-		await db.execute(UPDATE_USER_PROFILE(firstname, surname, address, date_of_birth, description, id_user));
+		await db.execute(UPDATE_USER_PROFILE(firstname, surname, address, description, id_user));
 		return res.json({
 			message: "Profile updated",
 		});

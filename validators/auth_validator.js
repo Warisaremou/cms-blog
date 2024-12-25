@@ -120,7 +120,7 @@ const updateProfileValidator = [
 	body("surname").trim(),
 	body("firstname").trim(),
 	body("address").trim(),
-	body("date_of_birth").trim(),
+	// body("date_of_birth").trim(),
 	body("description").trim(),
 ];
 
